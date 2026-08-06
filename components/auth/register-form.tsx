@@ -120,7 +120,7 @@ export function RegisterForm() {
   })
 
   function onCountryChange(countryId: string) {
-    const loc: Location | undefined = countries.find((c) => c.id === countryId)
+    const loc: Location | undefined = countries.find((c: Location) => c.id === countryId)
     setSelectedCountryId(countryId)
     setCountryCode(loc?.code ?? null)
     setSelectedProvinceId(null)
