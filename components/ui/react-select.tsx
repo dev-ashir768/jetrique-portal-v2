@@ -63,7 +63,7 @@ function classNames<
 }
 
 function MultiValueRemove<
-  Option = any,
+  Option = unknown,
   IsMulti extends boolean = boolean,
   Group extends GroupBase<Option> = GroupBase<Option>,
 >(props: MultiValueRemoveProps<Option, IsMulti, Group>) {

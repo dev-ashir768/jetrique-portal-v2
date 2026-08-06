@@ -1,0 +1,245 @@
+
+> portal@0.1.0 lint
+> eslint
+
+
+/Users/ashirarif/jetrique-frontend/portal/components/auth/signup-form.tsx
+  37:24  warning  Compilation Skipped: Use of incompatible library
+
+This API returns functions which cannot be memoized without leading to stale UI. To prevent this, by default React Compiler will skip memoizing this component/hook. However, you may see issues if values from this API are passed to other components/hooks that are memoized.
+
+/Users/ashirarif/jetrique-frontend/portal/components/auth/signup-form.tsx:37:24
+  35 |   })
+  36 |
+> 37 |   const selectedRole = watch("role")
+     |                        ^^^^^ React Hook Form's `useForm()` API returns a `watch()` function which cannot be memoized safely.
+  38 |
+  39 |   const signup = useSignup(setError)
+  40 |  react-hooks/incompatible-library
+
+/Users/ashirarif/jetrique-frontend/portal/components/common/auth-guard.tsx
+  14:5  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/Users/ashirarif/jetrique-frontend/portal/components/common/auth-guard.tsx:14:5
+  12 |
+  13 |   useEffect(() => {
+> 14 |     setMounted(true)
+     |     ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  15 |   }, [])
+  16 |
+  17 |   useEffect(() => {  react-hooks/set-state-in-effect
+
+/Users/ashirarif/jetrique-frontend/portal/components/common/guest-guard.tsx
+  13:5  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/Users/ashirarif/jetrique-frontend/portal/components/common/guest-guard.tsx:13:5
+  11 |
+  12 |   useEffect(() => {
+> 13 |     setMounted(true)
+     |     ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  14 |   }, [])
+  15 |
+  16 |   useEffect(() => {  react-hooks/set-state-in-effect
+
+/Users/ashirarif/jetrique-frontend/portal/components/layout/header.tsx
+  15:5  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/Users/ashirarif/jetrique-frontend/portal/components/layout/header.tsx:15:5
+  13 |   useEffect(() => {
+  14 |     const isMacOs = /Mac|iPod|iPhone|iPad/.test(navigator.userAgent)
+> 15 |     setIsMac(isMacOs)
+     |     ^^^^^^^^ Avoid calling setState() directly within an effect
+  16 |   }, [])
+  17 |
+  18 |   return (  react-hooks/set-state-in-effect
+
+/Users/ashirarif/jetrique-frontend/portal/components/layout/sidebar.tsx
+  44:36  error  Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+/Users/ashirarif/jetrique-frontend/portal/components/layout/sidebar.tsx:44:36
+  42 |       )}
+  43 |     >
+> 44 |       {!indent && !isCollapsed && <Icon className="h-4.5 w-4.5 shrink-0" />}
+     |                                    ^^^^ This component is created during render
+  45 |       {!isCollapsed && <span>{item.name}</span>}
+  46 |     </Link>
+  47 |   )
+
+/Users/ashirarif/jetrique-frontend/portal/components/layout/sidebar.tsx:30:16
+  28 |
+  29 |   const isActive = pathname === href || pathname.startsWith(href + "/")
+> 30 |   const Icon = getIcon(item.icon)
+     |                ^^^^^^^^^^^^^^^^^^ The component is created during render here
+  31 |
+  32 |   return (
+  33 |     <Link  react-hooks/static-components
+  78:10  error  Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+/Users/ashirarif/jetrique-frontend/portal/components/layout/sidebar.tsx:78:10
+  76 |         )}
+  77 |       >
+> 78 |         <Icon className="h-4.5 w-4.5 shrink-0" />
+     |          ^^^^ This component is created during render
+  79 |         {!isCollapsed && (
+  80 |           <>
+  81 |             <span className="flex-1 text-left">{item.name}</span>
+
+/Users/ashirarif/jetrique-frontend/portal/components/layout/sidebar.tsx:64:16
+  62 |   )
+  63 |   const [open, setOpen] = useState(isChildActive)
+> 64 |   const Icon = getIcon(item.icon)
+     |                ^^^^^^^^^^^^^^^^^^ The component is created during render here
+  65 |
+  66 |   return (
+  67 |     <div>                            react-hooks/static-components
+
+/Users/ashirarif/jetrique-frontend/portal/components/ui/file-upload.tsx
+   393:9   error    Error: Cannot reassign variable after render completes
+
+Reassigning `state` after render has completed can cause inconsistent behavior on subsequent renders. Consider using state instead.
+
+/Users/ashirarif/jetrique-frontend/portal/components/ui/file-upload.tsx:393:9
+  391 |       getState: () => state,
+  392 |       dispatch: (action) => {
+> 393 |         state = reducer(state, action);
+      |         ^^^^^ Cannot reassign `state` after render completes
+  394 |         for (const listener of listeners) {
+  395 |           listener();
+  396 |         }                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    react-hooks/immutability
+   775:5   error    Error: Cannot modify local variables after render completes
+
+This argument is a function which may reassign or mutate `context` after render, which can cause inconsistent behavior on subsequent renders. Consider using state instead.
+
+/Users/ashirarif/jetrique-frontend/portal/components/ui/file-upload.tsx:775:5
+  773 |
+  774 |   const onDrop = React.useCallback(
+> 775 |     (event: React.DragEvent<HTMLDivElement>) => {
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 776 |       propsRef.current.onDrop?.(event);
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 777 |
+      …
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 793 |       inputElement.dispatchEvent(new Event("change", { bubbles: true }));
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 794 |     },
+      | ^^^^^^ This function may (indirectly) reassign or modify `context` after render
+  795 |     [store, context.inputRef, propsRef],
+  796 |   );
+  797 |
+
+/Users/ashirarif/jetrique-frontend/portal/components/ui/file-upload.tsx:792:7
+  790 |       }
+  791 |
+> 792 |       inputElement.files = dataTransfer.files;
+      |       ^^^^^^^^^^^^ This modifies `context`
+  793 |       inputElement.dispatchEvent(new Event("change", { bubbles: true }));
+  794 |     },
+  795 |     [store, context.inputRef, propsRef],                 react-hooks/immutability
+   792:7   error    Error: This value cannot be modified
+
+Modifying a value returned from a hook is not allowed. Consider moving the modification into the hook where the value is constructed.
+
+/Users/ashirarif/jetrique-frontend/portal/components/ui/file-upload.tsx:792:7
+  790 |       }
+  791 |
+> 792 |       inputElement.files = dataTransfer.files;
+      |       ^^^^^^^^^^^^ `context` cannot be modified
+  793 |       inputElement.dispatchEvent(new Event("change", { bubbles: true }));
+  794 |     },
+  795 |     [store, context.inputRef, propsRef],                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               react-hooks/immutability
+   799:5   error    Error: Cannot modify local variables after render completes
+
+This argument is a function which may reassign or mutate `context` after render, which can cause inconsistent behavior on subsequent renders. Consider using state instead.
+
+/Users/ashirarif/jetrique-frontend/portal/components/ui/file-upload.tsx:799:5
+  797 |
+  798 |   const onPaste = React.useCallback(
+> 799 |     (event: React.ClipboardEvent<HTMLDivElement>) => {
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 800 |       propsRef.current.onPaste?.(event);
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 801 |
+      …
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 832 |       inputElement.dispatchEvent(new Event("change", { bubbles: true }));
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 833 |     },
+      | ^^^^^^ This function may (indirectly) reassign or modify `context` after render
+  834 |     [store, context.inputRef, propsRef],
+  835 |   );
+  836 |
+
+/Users/ashirarif/jetrique-frontend/portal/components/ui/file-upload.tsx:831:7
+  829 |       }
+  830 |
+> 831 |       inputElement.files = dataTransfer.files;
+      |       ^^^^^^^^^^^^ This modifies `context`
+  832 |       inputElement.dispatchEvent(new Event("change", { bubbles: true }));
+  833 |     },
+  834 |     [store, context.inputRef, propsRef],  react-hooks/immutability
+   831:7   error    Error: This value cannot be modified
+
+Modifying a value returned from a hook is not allowed. Consider moving the modification into the hook where the value is constructed.
+
+/Users/ashirarif/jetrique-frontend/portal/components/ui/file-upload.tsx:831:7
+  829 |       }
+  830 |
+> 831 |       inputElement.files = dataTransfer.files;
+      |       ^^^^^^^^^^^^ `context` cannot be modified
+  832 |       inputElement.dispatchEvent(new Event("change", { bubbles: true }));
+  833 |     },
+  834 |     [store, context.inputRef, propsRef],                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               react-hooks/immutability
+   855:5   warning  The attribute aria-disabled is not supported by the role region                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   jsx-a11y/role-supports-aria-props
+   855:5   warning  The attribute aria-invalid is not supported by the role region                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    jsx-a11y/role-supports-aria-props
+   946:5   warning  The attribute aria-orientation is not supported by the role list                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  jsx-a11y/role-supports-aria-props
+  1080:11  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           @next/next/no-img-element
+
+/Users/ashirarif/jetrique-frontend/portal/components/ui/react-select.tsx
+  66:12  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/ashirarif/jetrique-frontend/portal/hooks/use-media-query.ts
+  10:5  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/Users/ashirarif/jetrique-frontend/portal/hooks/use-media-query.ts:10:5
+   8 |   useEffect(() => {
+   9 |     const media = window.matchMedia(query)
+> 10 |     setMatches(media.matches)
+     |     ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  11 |     const listener = (e: MediaQueryListEvent) => setMatches(e.matches)
+  12 |     media.addEventListener("change", listener)
+  13 |     return () => media.removeEventListener("change", listener)  react-hooks/set-state-in-effect
+
+/Users/ashirarif/jetrique-frontend/portal/lib/api/client.ts
+  26:7  warning  Do not use `window.location.href` to navigate to internal Next.js pages. Use `redirect()` in the render phase, or `useRouter().push()` in Client Components' event handlers instead. See: https://nextjs.org/docs/messages/no-location-assign-relative-destination  @next/next/no-location-assign-relative-destination
+
+✖ 18 problems (12 errors, 6 warnings)
+

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, createElement } from "react"
 import { usePathname } from "next/navigation"
 import Link from "next/link"
 import { ChevronRight } from "lucide-react"
@@ -27,7 +27,7 @@ function NavLink({
   if (!href) return null
 
   const isActive = pathname === href || pathname.startsWith(href + "/")
-  const Icon = getIcon(item.icon)
+  const icon = getIcon(item.icon)
 
   return (
     <Link
@@ -41,7 +41,7 @@ function NavLink({
         indent && !isCollapsed && "pl-5 ml-1",
       )}
     >
-      {!indent && !isCollapsed && <Icon className="h-4.5 w-4.5 shrink-0" />}
+      {!indent && !isCollapsed && createElement(icon, { className: "h-4.5 w-4.5 shrink-0" })}
       {!isCollapsed && <span>{item.name}</span>}
     </Link>
   )
@@ -61,7 +61,7 @@ function NavDropdown({
       (pathname === child.path || pathname.startsWith(child.path + "/")),
   )
   const [open, setOpen] = useState(isChildActive)
-  const Icon = getIcon(item.icon)
+  const icon = getIcon(item.icon)
 
   return (
     <div>
@@ -75,7 +75,7 @@ function NavDropdown({
           isCollapsed && "justify-center px-2",
         )}
       >
-        <Icon className="h-4.5 w-4.5 shrink-0" />
+        {createElement(icon, { className: "h-4.5 w-4.5 shrink-0" })}
         {!isCollapsed && (
           <>
             <span className="flex-1 text-left">{item.name}</span>

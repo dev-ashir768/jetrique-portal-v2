@@ -12,6 +12,7 @@ export function Header() {
 
   useEffect(() => {
     const isMacOs = /Mac|iPod|iPhone|iPad/.test(navigator.userAgent)
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsMac(isMacOs)
   }, [])
 
