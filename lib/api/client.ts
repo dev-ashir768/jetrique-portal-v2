@@ -18,10 +18,14 @@ apiClient.interceptors.request.use((config) => {
   return config
 })
 
+const AUTH_ENDPOINTS = ["/auth/login", "/auth/register", "/auth/forgot-password", "/auth/reset-password"]
+
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    const url: string = error.config?.url ?? ""
+    const isAuthEndpoint = AUTH_ENDPOINTS.some((e) => url.includes(e))
+    if (error.response?.status === 401 && !isAuthEndpoint) {
       localStorage.removeItem(TOKEN_KEY)
       // eslint-disable-next-line @next/next/no-location-assign-relative-destination
       window.location.href = "/login"
