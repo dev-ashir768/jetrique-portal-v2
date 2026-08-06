@@ -77,7 +77,7 @@ export function CreateMenuDialog() {
         <DialogHeader>
           <DialogTitle>Create Menu</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4 py-2">
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
           {/* Name */}
           <div className="flex flex-col gap-1.5">
             <Label className="text-xs">Name</Label>
@@ -128,12 +128,12 @@ export function CreateMenuDialog() {
             />
           </div>
 
-          <div className="flex justify-end gap-2 pt-2">
-            <Button type="button" variant="outline" size="sm" onClick={() => { setOpen(false); reset() }}>
-              Cancel
-            </Button>
-            <Button type="submit" size="sm" disabled={isPending}>
+          <div className="flex justify-center gap-4 pt-2">
+            <Button type="submit" size="lg" disabled={isPending}>
               {isPending ? "Creating..." : "Create"}
+            </Button>
+            <Button type="button" variant="secondary" size="lg" onClick={() => { setOpen(false); reset() }}>
+              Cancel
             </Button>
           </div>
         </form>

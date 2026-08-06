@@ -299,7 +299,7 @@ function FilterDialog({
             </div>
           ))}
         </div>
-        <div className="flex justify-center gap-2">
+        <div className="flex justify-center gap-4">
           <Button size="lg" onClick={handleApply}>
             Apply Filter
           </Button>

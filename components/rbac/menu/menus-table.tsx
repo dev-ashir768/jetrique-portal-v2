@@ -30,12 +30,10 @@ function ToggleStatusBadge({ row }: { row: MenuItem }) {
   )
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const columns: ColumnDef<typeof features, MenuItem, any>[] = [
+const columns: ColumnDef<typeof features, MenuItem>[] = [
   {
     accessorKey: "name",
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    header: ({ column }: any) => (
+    header: ({ column }) => (
       <SortableHeader column={column} title="Name" />
     ),
   },
@@ -46,28 +44,24 @@ const columns: ColumnDef<typeof features, MenuItem, any>[] = [
   {
     accessorKey: "path",
     header: "Path",
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    cell: ({ getValue }: any) => getValue() ?? <span className="text-muted-foreground">—</span>,
+    cell: ({ getValue }) => (getValue() as string | null) ?? <span className="text-muted-foreground">—</span>,
   },
   {
     accessorKey: "icon",
     header: "Icon",
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    cell: ({ getValue }: any) => (
-      <code className="rounded bg-muted px-1.5 py-0.5 text-xs">{getValue()}</code>
+    cell: ({ getValue }) => (
+      <code className="rounded bg-muted px-1.5 py-0.5 text-xs">{getValue() as string}</code>
     ),
   },
   {
     accessorKey: "parentName",
     header: "Parent",
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    cell: ({ getValue }: any) => getValue() ?? "-",
+    cell: ({ getValue }) => (getValue() as string | null) ?? "-",
   },
   {
     accessorKey: "isActive",
     header: "Status",
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    cell: ({ row }: any) => <ToggleStatusBadge row={row.original} />,
+    cell: ({ row }) => <ToggleStatusBadge row={row.original} />,
   },
 ]
 
