@@ -1,6 +1,6 @@
 "use client"
 
-import { useForm } from "react-hook-form"
+import { useForm, useWatch } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Eye, EyeOff, Loader2 } from "lucide-react"
 import { useState } from "react"
@@ -17,8 +17,8 @@ export function SignupForm() {
   const {
     register,
     handleSubmit,
-    watch,
     setError,
+    control,
     formState: { errors },
   } = useForm<SignupFormValues>({
     resolver: zodResolver(signupSchema),
@@ -34,7 +34,10 @@ export function SignupForm() {
     },
   })
 
-  const selectedRole = watch("role")
+  const selectedRole = useWatch({
+    control,
+    name: "role"
+  })
 
   const signup = useSignup(setError)
 
@@ -105,11 +108,10 @@ export function SignupForm() {
         <Label>Account type</Label>
         <div className="grid grid-cols-2 gap-3">
           <label
-            className={`flex cursor-pointer items-center justify-center rounded-lg border-2 px-4 py-2.5 text-sm font-medium transition-colors ${
-              selectedRole === "OPERATOR"
+            className={`flex cursor-pointer items-center justify-center rounded-lg border-2 px-4 py-2.5 text-sm font-medium transition-colors ${selectedRole === "OPERATOR"
                 ? "border-primary bg-primary/5 text-primary"
                 : "border-border text-muted-foreground hover:border-primary/40"
-            }`}
+              }`}
           >
             <input
               type="radio"
@@ -120,11 +122,10 @@ export function SignupForm() {
             Operator
           </label>
           <label
-            className={`flex cursor-pointer items-center justify-center rounded-lg border-2 px-4 py-2.5 text-sm font-medium transition-colors ${
-              selectedRole === "AGENT"
+            className={`flex cursor-pointer items-center justify-center rounded-lg border-2 px-4 py-2.5 text-sm font-medium transition-colors ${selectedRole === "AGENT"
                 ? "border-primary bg-primary/5 text-primary"
                 : "border-border text-muted-foreground hover:border-primary/40"
-            }`}
+              }`}
           >
             <input
               type="radio"
