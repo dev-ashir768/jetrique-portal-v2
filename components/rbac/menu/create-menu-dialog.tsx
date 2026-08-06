@@ -17,7 +17,6 @@ import {
 import { ReactSelectSingle } from "@/components/ui/react-select"
 import { useCreateMenu, useAllMenus } from "@/hooks/use-rbac"
 import { CreateMenuFormValues, createMenuSchema } from "@/lib/validations/rbac"
-import { Can } from "@/components/common"
 import type { MenuItem } from "@/types"
 
 
@@ -71,11 +70,7 @@ export function CreateMenuDialog() {
   return (
     <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) reset() }}>
       <DialogTrigger asChild>
-        <Can menu="menus" permission="create">
-          <Button>
-            Create Menu
-          </Button>
-        </Can>
+        <Button>Create Menu</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
