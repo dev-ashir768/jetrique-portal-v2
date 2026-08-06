@@ -412,14 +412,14 @@ export function DataTable<TData extends RowData>({
   return (
     <div className="flex flex-col gap-0 rounded-md bg-white overflow-hidden">
       {/* Toolbar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-2.5">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 p-2.5">
         <div className="flex flex-1 flex-wrap items-center gap-3">
           {onSearch && (
             <Input
               placeholder={searchPlaceholder}
               value={searchValue}
               onChange={(e) => handleSearch(e.target.value)}
-              className="w-full sm:max-w-xs"
+              className="w-full md:max-w-xs"
             />
           )}
 
@@ -432,7 +432,7 @@ export function DataTable<TData extends RowData>({
           )}
         </div>
 
-        <div className="flex items-center gap-1.5 self-end sm:self-auto">
+        <div className="flex items-center gap-1.5 self-end md:self-auto">
           {onRefetch && (
             <Tooltip>
               <TooltipTrigger asChild>
