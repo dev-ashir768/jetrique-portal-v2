@@ -7,4 +7,7 @@ export const rbacApi = {
 
   getMenus: (params?: MenusParams) =>
     apiClient.get<ApiResponse<MenusResponse>>("/rbac/menus", { params }),
+
+  toggleMenuActive: (id: string, isActive: boolean) =>
+    apiClient.patch<ApiResponse<MenuItem>>(`/rbac/menus/${id}/active`, { isActive }),
 }

@@ -1,11 +1,23 @@
 "use client"
 
 import { useState } from "react"
-import { useAllMenus} from "@/hooks/use-rbac"
+import { useAllMenus, useToggleMenuActive } from "@/hooks/use-rbac"
 import { DataTable, SortableHeader, features } from "@/components/common/data-table"
 import { Badge } from "@/components/ui/badge"
+import { StatusBadge } from "@/components/ui/status-badge"
 import type { ColumnDef } from "@tanstack/table-core"
 import type { MenuItem, MenusParams } from "@/types"
+
+function ToggleStatusBadge({ row }: { row: MenuItem }) {
+  const { mutate, isPending } = useToggleMenuActive()
+  return (
+    <StatusBadge
+      status={isPending ? row.isActive : row.isActive}
+      className="cursor-pointer hover:opacity-70 transition-opacity"
+      onClick={() => !isPending && mutate({ id: row.id, isActive: !row.isActive })}
+    />
+  )
+}
 
 const columns: ColumnDef<typeof features, MenuItem, any>[] = [
   {
@@ -38,12 +50,7 @@ const columns: ColumnDef<typeof features, MenuItem, any>[] = [
   {
     accessorKey: "isActive",
     header: "Status",
-    cell: ({ getValue }: any) =>
-      getValue() ? (
-        <Badge variant="secondary" className="text-green-600">Active</Badge>
-      ) : (
-        <Badge variant="secondary" className="text-destructive">Inactive</Badge>
-      ),
+    cell: ({ row }: any) => <ToggleStatusBadge row={row.original} />,
   },
 ]
 
