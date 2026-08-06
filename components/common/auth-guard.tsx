@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState, type ReactNode } from "react"
+import { useEffect, useState, type ReactNode } from "react"
 import { useRouter, usePathname } from "next/navigation"
 import { useAuthStore, useRBACStore } from "@/stores"
 import { useMyMenus } from "@/hooks/use-rbac"
@@ -38,59 +38,49 @@ export function AuthGuard({ children }: { children: ReactNode }) {
   const router = useRouter()
   const pathname = usePathname()
 
-  // Kick off menu fetch. Only redirect AFTER this resolves (isSuccess) so we
-  // never redirect based on stale/partial localStorage data.
-  const { isLoading: menusLoading, isSuccess: menusLoaded } = useMyMenus()
+  const { isLoading: menusLoading, isSuccess: menusReady } = useMyMenus()
 
-  // Track auth store hydration
-  const [authHydrated, setAuthHydrated] = useState(
-    () => typeof window !== "undefined" && useAuthStore.persist.hasHydrated(),
-  )
+  const [hydrated, setHydrated] = useState(false)
+
   useEffect(() => {
-    if (useAuthStore.persist.hasHydrated()) {
-      setAuthHydrated(true)
-      return
+    const checkHydration = () => {
+      const authReady = useAuthStore.persist?.hasHydrated?.() ?? true
+      const rbacReady = useRBACStore.persist?.hasHydrated?.() ?? true
+      if (authReady && rbacReady) {
+        setHydrated(true)
+      }
     }
-    const unsub = useAuthStore.persist.onFinishHydration(() => setAuthHydrated(true))
-    return unsub
-  }, [])
 
-  // Track RBAC store hydration
-  const [rbacHydrated, setRbacHydrated] = useState(
-    () => typeof window !== "undefined" && useRBACStore.persist.hasHydrated(),
-  )
-  useEffect(() => {
-    if (useRBACStore.persist.hasHydrated()) {
-      setRbacHydrated(true)
-      return
+    checkHydration()
+
+    if (!hydrated) {
+      const unsub1 = useAuthStore.persist?.onFinishHydration?.(() => checkHydration())
+      const unsub2 = useRBACStore.persist?.onFinishHydration?.(() => checkHydration())
+      return () => { unsub1?.(); unsub2?.() }
     }
-    const unsub = useRBACStore.persist.onFinishHydration(() => setRbacHydrated(true))
-    return unsub
-  }, [])
-
-  const hydrated = authHydrated && rbacHydrated
+  }, [hydrated])
 
   // Redirect to login
   useEffect(() => {
-    if (authHydrated && !isAuthenticated) {
+    if (hydrated && !isAuthenticated) {
       router.replace("/login")
     }
-  }, [authHydrated, isAuthenticated, router])
+  }, [hydrated, isAuthenticated, router])
 
-  // Redirect to dashboard ONLY after menus have been freshly fetched from the API.
-  // This prevents a stale-localStorage check from wrongly kicking the user out.
+  // Only check route permission AFTER fresh menus are fetched from API.
+  // Never redirect based on stale localStorage — that causes the refresh-redirect bug.
   useEffect(() => {
-    if (!hydrated || !isAuthenticated) return
-    if (!menusLoaded) return            // wait for API, not just localStorage
-    if (!isRouteAllowed(pathname, menus)) {
+    if (!hydrated || !isAuthenticated || !menusReady) return
+    const paths = getAllPaths(menus).map(normalizePath)
+    const allowed = isRouteAllowed(pathname, menus)
+    // eslint-disable-next-line no-console
+    console.debug("[AuthGuard] route check", { pathname, allowed, paths })
+    if (menus.length > 0 && !allowed) {
       router.replace("/dashboard")
     }
-  }, [hydrated, isAuthenticated, menusLoaded, menus, pathname, router])
+  }, [hydrated, isAuthenticated, menusReady, menus, pathname, router])
 
-  // Show skeleton/spinner until both stores are hydrated and menus are loading
-  const ready = hydrated && (menusLoaded || menus.length > 0)
-
-  if (!ready) {
+  if (!hydrated || (!menusReady && menus.length === 0)) {
     return (
       <div className="flex h-screen items-center justify-center">
         <Spinner className="h-8 w-8" />
@@ -100,9 +90,9 @@ export function AuthGuard({ children }: { children: ReactNode }) {
 
   if (!isAuthenticated) return null
 
-  // While menus are still fetching on refresh, use localStorage copy for optimistic render.
-  // If that copy says the route is blocked, wait for the real fetch before deciding.
-  if (menusLoaded && !isRouteAllowed(pathname, menus)) return null
+  // Render children optimistically using localStorage menus while API fetch is in-flight.
+  // Only block rendering after API confirms route is disallowed.
+  if (menusReady && menus.length > 0 && !isRouteAllowed(pathname, menus)) return null
 
   return <>{children}</>
 }
