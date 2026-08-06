@@ -26,11 +26,60 @@ export function useAgents(filters?: OrganizationFilters) {
   })
 }
 
+export function useOrganization(id: string) {
+  return useQuery({
+    queryKey: ["organization", id],
+    queryFn: async () => {
+      const { data } = await organizationsApi.getById(id)
+      return data.data
+    },
+    enabled: !!id,
+  })
+}
+
+export function useOrganizationDocuments(id: string) {
+  return useQuery({
+    queryKey: ["organization-documents", id],
+    queryFn: async () => {
+      const { data } = await organizationsApi.getDocuments(id)
+      return data.data
+    },
+    enabled: !!id,
+  })
+}
+
+export function useVerifyDocument(orgId: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (docId: string) => organizationsApi.verifyDocument(orgId, docId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["organization-documents", orgId] })
+      toast.success("Document verified")
+    },
+    onError: (error: Error) => toast.error(getErrorMessage(error)),
+  })
+}
+
+export function useRejectDocument(orgId: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ docId, remarks }: { docId: string; remarks: string }) =>
+      organizationsApi.rejectDocument(orgId, docId, remarks),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["organization-documents", orgId] })
+      toast.success("Document rejected")
+    },
+    onError: (error: Error) => toast.error(getErrorMessage(error)),
+  })
+}
+
 export function useApproveOrganization() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (id: string) => organizationsApi.approve(id),
-    onSuccess: () => {
+    mutationFn: ({ id, commissionRate }: { id: string; commissionRate?: number }) =>
+      organizationsApi.approve(id, commissionRate !== undefined ? { commissionRate } : undefined),
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: ["organization", id] })
       queryClient.invalidateQueries({ queryKey: ["operators"] })
       queryClient.invalidateQueries({ queryKey: ["agents"] })
       toast.success("Organization approved")
@@ -44,7 +93,8 @@ export function useRejectOrganization() {
   return useMutation({
     mutationFn: ({ id, remarks }: { id: string; remarks: string }) =>
       organizationsApi.reject(id, remarks),
-    onSuccess: () => {
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: ["organization", id] })
       queryClient.invalidateQueries({ queryKey: ["operators"] })
       queryClient.invalidateQueries({ queryKey: ["agents"] })
       toast.success("Organization rejected")
@@ -56,8 +106,10 @@ export function useRejectOrganization() {
 export function useSuspendOrganization() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (id: string) => organizationsApi.suspend(id),
-    onSuccess: () => {
+    mutationFn: ({ id, remarks }: { id: string; remarks: string }) =>
+      organizationsApi.suspend(id, remarks),
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: ["organization", id] })
       queryClient.invalidateQueries({ queryKey: ["operators"] })
       queryClient.invalidateQueries({ queryKey: ["agents"] })
       toast.success("Organization suspended")

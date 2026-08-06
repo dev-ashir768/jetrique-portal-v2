@@ -24,7 +24,7 @@ export interface OperatorProfile {
 export interface AgentProfile {
   id: string
   organizationId: string
-  category: AgentCategory
+  agentCategory: AgentCategory
   createdAt: string
   updatedAt: string
 }
@@ -47,6 +47,21 @@ export interface Organization {
   operatorProfile: OperatorProfile | null
   agentProfile: AgentProfile | null
   city: Location | null
+}
+
+export interface OrganizationDocument {
+  id: string
+  organizationId: string
+  documentType: string
+  fileKey: string
+  fileName: string
+  status: "PENDING" | "VERIFIED" | "REJECTED"
+  remarks: string | null
+  reviewedById: string | null
+  reviewedAt: string | null
+  createdAt: string
+  updatedAt: string
+  downloadUrl: string
 }
 
 export interface OrganizationFilters {

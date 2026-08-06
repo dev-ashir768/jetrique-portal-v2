@@ -115,6 +115,7 @@ export interface DataTableProps<TData extends RowData> {
   isLoading?: boolean
   emptyMessage?: string
   storageKey?: string
+  onRowClick?: (row: TData) => void
 }
 
 // ── Export Helpers ──
@@ -253,7 +254,7 @@ function FilterDialog({
       <Tooltip>
         <TooltipTrigger asChild>
           <DialogTrigger asChild>
-            <Button variant="outline" size="icon" className="relative h-8 w-8">
+            <Button variant="secondary" size="icon" className="relative h-8 w-8">
               <ListFilter className="h-4 w-4" />
               {activeCount > 0 && (
                 <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] text-primary-foreground">
@@ -359,6 +360,7 @@ export function DataTable<TData extends RowData>({
   isLoading = false,
   emptyMessage = "No results found.",
   storageKey,
+  onRowClick,
 }: DataTableProps<TData>) {
   const [columnVisibility, setColumnVisibility] = useState<ColumnVisibilityState>(() =>
     loadVisibility(storageKey)
@@ -436,7 +438,7 @@ export function DataTable<TData extends RowData>({
           {onRefetch && (
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="outline" size="icon" className="h-8 w-8" onClick={onRefetch}>
+                <Button variant="secondary" size="icon" className="h-8 w-8" onClick={onRefetch}>
                   <RefreshCw className="h-4 w-4" />
                 </Button>
               </TooltipTrigger>
@@ -456,7 +458,7 @@ export function DataTable<TData extends RowData>({
             <Tooltip>
               <TooltipTrigger asChild>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="icon" className="h-8 w-8">
+                  <Button variant="secondary" size="icon" className="h-8 w-8">
                     <Columns3 className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -485,7 +487,7 @@ export function DataTable<TData extends RowData>({
             <Tooltip>
               <TooltipTrigger asChild>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="icon" className="h-8 w-8">
+                  <Button variant="secondary" size="icon" className="h-8 w-8">
                     <Download className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -551,7 +553,8 @@ export function DataTable<TData extends RowData>({
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
-                  className="transition-colors border-b border-gray-50 hover:bg-gray-50/80"
+                  className={`transition-colors border-b border-gray-50 hover:bg-gray-50/80 ${onRowClick ? "cursor-pointer" : ""}`}
+                  onClick={onRowClick ? () => onRowClick(row.original) : undefined}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id} className="px-3 py-2 text-sm text-gray-700">
@@ -594,7 +597,7 @@ export function DataTable<TData extends RowData>({
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
-                  variant="outline"
+                  variant="secondary"
                   size="icon"
                   className="h-8 w-8"
                   onClick={() => onPaginationChange(1, pagination.limit)}
@@ -608,7 +611,7 @@ export function DataTable<TData extends RowData>({
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
-                  variant="outline"
+                  variant="secondary"
                   size="icon"
                   className="h-8 w-8"
                   onClick={() => onPaginationChange(pagination.page - 1, pagination.limit)}
@@ -627,7 +630,7 @@ export function DataTable<TData extends RowData>({
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
-                  variant="outline"
+                  variant="secondary"
                   size="icon"
                   className="h-8 w-8"
                   onClick={() => onPaginationChange(pagination.page + 1, pagination.limit)}
@@ -641,7 +644,7 @@ export function DataTable<TData extends RowData>({
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
-                  variant="outline"
+                  variant="secondary"
                   size="icon"
                   className="h-8 w-8"
                   onClick={() => onPaginationChange(pagination.pages, pagination.limit)}

@@ -1,28 +1,11 @@
 "use client"
 
 import { useState } from "react"
-import { useAgents, useApproveOrganization, useRejectOrganization, useSuspendOrganization } from "@/hooks/use-organizations"
-import { usePermissions } from "@/hooks/use-permission"
+import { useRouter } from "next/navigation"
+import { useAgents } from "@/hooks/use-organizations"
 import { DataTable, SortableHeader, features } from "@/components/common/data-table"
 import { StatusBadge } from "@/components/ui/status-badge"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog"
-import { Textarea } from "@/components/ui/textarea"
-import { Label } from "@/components/ui/label"
-import { MoreHorizontal } from "lucide-react"
 import type { ColumnDef } from "@tanstack/table-core"
 import type { Organization, OrganizationFilters, OrganizationStatus } from "@/types"
 import { AGENT_CATEGORIES } from "@/lib/constants"
@@ -34,90 +17,6 @@ function AgentCategoryBadge({ category }: { category: string | undefined }) {
     <Badge variant="outline" className="text-xs font-medium">
       {label}
     </Badge>
-  )
-}
-
-function ActionsCell({ row }: { row: Organization }) {
-  const [rejectOpen, setRejectOpen] = useState(false)
-  const [remarks, setRemarks] = useState("")
-
-  const perms = usePermissions("agents", ["approve", "reject", "suspend"])
-  const { mutate: approve, isPending: approving } = useApproveOrganization()
-  const { mutate: reject, isPending: rejecting } = useRejectOrganization()
-  const { mutate: suspend, isPending: suspending } = useSuspendOrganization()
-
-  const canApprove = perms.approve && row.status === "PENDING"
-  const canReject = perms.reject && (row.status === "PENDING" || row.status === "APPROVED")
-  const canSuspend = perms.suspend && row.status === "APPROVED"
-
-  if (!canApprove && !canReject && !canSuspend) return null
-
-  return (
-    <>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon" className="h-8 w-8">
-            <MoreHorizontal className="h-4 w-4" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          {canApprove && (
-            <DropdownMenuItem onClick={() => approve(row.id)} disabled={approving}>
-              Approve
-            </DropdownMenuItem>
-          )}
-          {canReject && (
-            <DropdownMenuItem
-              onClick={() => setRejectOpen(true)}
-              className="text-destructive focus:text-destructive"
-            >
-              Reject
-            </DropdownMenuItem>
-          )}
-          {canSuspend && (
-            <DropdownMenuItem
-              onClick={() => suspend(row.id)}
-              disabled={suspending}
-              className="text-destructive focus:text-destructive"
-            >
-              Suspend
-            </DropdownMenuItem>
-          )}
-        </DropdownMenuContent>
-      </DropdownMenu>
-
-      <Dialog open={rejectOpen} onOpenChange={setRejectOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Reject Agent</DialogTitle>
-          </DialogHeader>
-          <div className="flex flex-col gap-1.5">
-            <Label>Reason <span className="text-destructive">*</span></Label>
-            <Textarea
-              placeholder="Provide a reason for rejection…"
-              value={remarks}
-              onChange={(e) => setRemarks(e.target.value)}
-              rows={3}
-            />
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setRejectOpen(false)}>Cancel</Button>
-            <Button
-              variant="destructive"
-              disabled={!remarks.trim() || rejecting}
-              onClick={() =>
-                reject(
-                  { id: row.id, remarks },
-                  { onSuccess: () => { setRejectOpen(false); setRemarks("") } },
-                )
-              }
-            >
-              {rejecting ? "Rejecting…" : "Reject"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </>
   )
 }
 
@@ -138,7 +37,7 @@ const columns: ColumnDef<typeof features, Organization>[] = [
     id: "category",
     header: "Category",
     cell: ({ row }) => (
-      <AgentCategoryBadge category={row.original.agentProfile?.category} />
+      <AgentCategoryBadge category={row.original.agentProfile?.agentCategory} />
     ),
   },
   {
@@ -161,14 +60,10 @@ const columns: ColumnDef<typeof features, Organization>[] = [
         year: "numeric",
       }),
   },
-  {
-    id: "actions",
-    header: "",
-    cell: ({ row }) => <ActionsCell row={row.original} />,
-  },
 ]
 
 export function AgentsTable() {
+  const router = useRouter()
   const [filters, setFilters] = useState<OrganizationFilters>({ page: 1, limit: 10 })
   const [activeFilters, setActiveFilters] = useState<Record<string, string>>({})
 
@@ -202,6 +97,7 @@ export function AgentsTable() {
       onSearch={(search) => setFilters((p) => ({ ...p, page: 1, search }))}
       onPaginationChange={(page, limit) => setFilters((p) => ({ ...p, page, limit }))}
       onRefetch={refetch}
+      onRowClick={(row) => router.push(`/organizations/agents/${row.id}`)}
       filters={[
         {
           key: "status",
