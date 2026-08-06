@@ -24,7 +24,8 @@ function ToggleStatusBadge({ row }: { row: MenuItem }) {
   return (
     <StatusBadge
       status={row.isActive}
-      className={isPending ? "opacity-50 cursor-not-allowed" : "cursor-pointer hover:opacity-70 transition-opacity"}
+      disabled={isPending}
+      className="cursor-pointer hover:opacity-70 transition-opacity"
       onClick={handleClick}
     />
   )

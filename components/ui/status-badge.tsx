@@ -45,9 +45,10 @@ interface StatusBadgeProps {
   status: StatusValue
   className?: string
   onClick?: () => void
+  disabled?: boolean
 }
 
-export function StatusBadge({ status, className, onClick }: StatusBadgeProps) {
+export function StatusBadge({ status, className, onClick, disabled }: StatusBadgeProps) {
   // Normalize boolean → string key
   const key =
     typeof status === "boolean"
@@ -60,8 +61,13 @@ export function StatusBadge({ status, className, onClick }: StatusBadgeProps) {
   return (
     <Badge
       variant="outline"
-      className={cn("font-medium", styles, className)}
-      onClick={onClick}
+      className={cn(
+        "font-medium",
+        styles,
+        disabled && "pointer-events-none opacity-50 cursor-not-allowed",
+        className,
+      )}
+      onClick={disabled ? undefined : onClick}
     >
       {label}
     </Badge>
