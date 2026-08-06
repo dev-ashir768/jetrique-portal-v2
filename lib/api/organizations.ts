@@ -1,41 +1,23 @@
 import { apiClient } from "./client"
-import type { PaginationParams } from "@/types"
+import type { ApiResponse } from "@/types"
+import type { Organization, OrganizationFilters, PaginatedApiResponse } from "@/types/organizations"
 
 export const organizationsApi = {
-  getAll: (params?: PaginationParams) =>
-    apiClient.get("/organizations", { params }),
+  getOperators: (params?: OrganizationFilters) =>
+    apiClient.get<PaginatedApiResponse<Organization>>("/organizations/operators", { params }),
+
+  getAgents: (params?: OrganizationFilters) =>
+    apiClient.get<PaginatedApiResponse<Organization>>("/organizations/agents", { params }),
 
   getById: (id: string) =>
-    apiClient.get(`/organizations/${id}`),
+    apiClient.get<ApiResponse<Organization>>(`/organizations/${id}`),
 
   approve: (id: string) =>
-    apiClient.patch(`/organizations/${id}/approve`),
+    apiClient.patch<ApiResponse<Organization>>(`/organizations/${id}/approve`),
 
-  reject: (id: string) =>
-    apiClient.patch(`/organizations/${id}/reject`),
+  reject: (id: string, remarks: string) =>
+    apiClient.patch<ApiResponse<Organization>>(`/organizations/${id}/reject`, { remarks }),
 
   suspend: (id: string) =>
-    apiClient.patch(`/organizations/${id}/suspend`),
-
-  updateCommission: (id: string, commission: number) =>
-    apiClient.patch(`/organizations/${id}/commission`, { commission }),
-
-  getDocuments: (id: string) =>
-    apiClient.get(`/organizations/${id}/documents`),
-
-  reuploadDocument: (id: string, documentId: string, file: File) => {
-    const formData = new FormData()
-    formData.append("document", file)
-    return apiClient.patch(
-      `/organizations/${id}/documents/${documentId}/reupload`,
-      formData,
-      { headers: { "Content-Type": "multipart/form-data" } },
-    )
-  },
-
-  getOperators: () =>
-    apiClient.get("/organizations/operators"),
-
-  getAgents: () =>
-    apiClient.get("/organizations/agents"),
+    apiClient.patch<ApiResponse<Organization>>(`/organizations/${id}/suspend`),
 }
