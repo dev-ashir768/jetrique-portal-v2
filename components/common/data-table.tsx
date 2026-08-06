@@ -254,9 +254,9 @@ function FilterDialog({
 
   return (
     <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (o) setLocalFilters(activeFilters) }}>
-      <DialogTrigger asChild>
-        <Tooltip>
-          <TooltipTrigger asChild>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <DialogTrigger asChild>
             <Button variant="outline" size="icon" className="relative h-10 w-10">
               <ListFilter className="h-4 w-4" />
               {activeCount > 0 && (
@@ -265,10 +265,10 @@ function FilterDialog({
                 </span>
               )}
             </Button>
-          </TooltipTrigger>
-          <TooltipContent>Filters</TooltipContent>
-        </Tooltip>
-      </DialogTrigger>
+          </DialogTrigger>
+        </TooltipTrigger>
+        <TooltipContent>Filters</TooltipContent>
+      </Tooltip>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Filters</DialogTitle>
@@ -454,16 +454,16 @@ export function DataTable<TData extends RowData>({
             )}
 
             <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Tooltip>
-                  <TooltipTrigger asChild>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <DropdownMenuTrigger asChild>
                     <Button variant="outline" size="icon" className="h-10 w-10">
                       <Columns3 className="h-4 w-4" />
                     </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>Columns</TooltipContent>
-                </Tooltip>
-              </DropdownMenuTrigger>
+                  </DropdownMenuTrigger>
+                </TooltipTrigger>
+                <TooltipContent>Columns</TooltipContent>
+              </Tooltip>
               <DropdownMenuContent align="end" className="w-44">
                 <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
                 <DropdownMenuSeparator />
@@ -483,16 +483,16 @@ export function DataTable<TData extends RowData>({
             </DropdownMenu>
 
             <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Tooltip>
-                  <TooltipTrigger asChild>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <DropdownMenuTrigger asChild>
                     <Button variant="outline" size="icon" className="h-10 w-10">
                       <Download className="h-4 w-4" />
                     </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>Export</TooltipContent>
-                </Tooltip>
-              </DropdownMenuTrigger>
+                  </DropdownMenuTrigger>
+                </TooltipTrigger>
+                <TooltipContent>Export</TooltipContent>
+              </Tooltip>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={() => exportToCSV(data, columns as any[], exportFileName)}>
                   Export as CSV
