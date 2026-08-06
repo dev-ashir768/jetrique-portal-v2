@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { toast } from "sonner"
 import { useAllMenus, useToggleMenuActive } from "@/hooks/use-rbac"
 import { DataTable, SortableHeader, features } from "@/components/common/data-table"
 import { Badge } from "@/components/ui/badge"
@@ -9,12 +10,22 @@ import type { ColumnDef } from "@tanstack/table-core"
 import type { MenuItem, MenusParams } from "@/types"
 
 function ToggleStatusBadge({ row }: { row: MenuItem }) {
-  const { mutate, isPending } = useToggleMenuActive()
+  const { mutateAsync, isPending } = useToggleMenuActive()
+
+  function handleClick() {
+    if (isPending) return
+    toast.promise(mutateAsync({ id: row.id, isActive: !row.isActive }), {
+      loading: "Please wait...",
+      success: "Status updated",
+      error: "Failed to update status",
+    })
+  }
+
   return (
     <StatusBadge
-      status={isPending ? row.isActive : row.isActive}
-      className="cursor-pointer hover:opacity-70 transition-opacity"
-      onClick={() => !isPending && mutate({ id: row.id, isActive: !row.isActive })}
+      status={row.isActive}
+      className={isPending ? "opacity-50 cursor-not-allowed" : "cursor-pointer hover:opacity-70 transition-opacity"}
+      onClick={handleClick}
     />
   )
 }
