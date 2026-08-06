@@ -33,7 +33,7 @@ function NavLink({
     <Link
       href={href}
       className={cn(
-        "flex h-10 items-center gap-1.5 rounded-md px-2.5 text-sm font-medium transition-colors",
+        "flex h-9 items-center gap-1.5 rounded-md px-2.5 text-sm font-medium transition-colors",
         isActive
           ? "bg-sidebar-accent text-sidebar-accent-foreground"
           : "text-muted-foreground hover:bg-sidebar-accent/50 hover:text-foreground",
@@ -68,7 +68,7 @@ function NavDropdown({
       <button
         onClick={() => setOpen((o) => !o)}
         className={cn(
-          "flex h-10 w-full items-center gap-1.5 rounded-md px-2.5 text-sm font-medium transition-colors",
+          "flex h-9 w-full items-center gap-1.5 rounded-md px-2.5 text-sm font-medium transition-colors",
           isChildActive
             ? "text-sidebar-accent-foreground"
             : "text-muted-foreground hover:bg-sidebar-accent/50 hover:text-foreground",
@@ -116,7 +116,7 @@ function SidebarSkeleton() {
   return (
     <div className="flex flex-col gap-1.5 px-2 py-3">
       {Array.from({ length: 6 }).map((_, i) => (
-        <Skeleton key={i} className="h-10 w-full rounded-md" />
+        <Skeleton key={i} className="h-9 w-full rounded-md" />
       ))}
     </div>
   )

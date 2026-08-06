@@ -69,7 +69,7 @@ export function CreateMenuDialog() {
   return (
     <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) reset() }}>
       <DialogTrigger asChild>
-        <Button size="lg">
+        <Button>
           Create Menu
         </Button>
       </DialogTrigger>
@@ -129,10 +129,10 @@ export function CreateMenuDialog() {
           </div>
 
           <div className="flex justify-center gap-4 pt-2">
-            <Button type="submit" size="lg" disabled={isPending}>
+            <Button type="submit"  disabled={isPending}>
               {isPending ? "Creating..." : "Create"}
             </Button>
-            <Button type="button" variant="secondary" size="lg" onClick={() => { setOpen(false); reset() }}>
+            <Button type="button" variant="secondary"  onClick={() => { setOpen(false); reset() }}>
               Cancel
             </Button>
           </div>

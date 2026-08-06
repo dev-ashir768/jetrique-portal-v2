@@ -84,7 +84,6 @@ export function LoginForm() {
 
       <Button
         type="submit"
-        size="lg"
         className="mt-2 w-full"
         disabled={login.isPending}
       >

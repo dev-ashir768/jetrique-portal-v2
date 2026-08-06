@@ -294,10 +294,10 @@ function FilterDialog({
           ))}
         </div>
         <div className="flex justify-center gap-4">
-          <Button size="lg" onClick={handleApply}>
+          <Button onClick={handleApply}>
             Apply Filter
           </Button>
-          <Button variant="secondary" size="lg" onClick={handleClear}>
+          <Button variant="secondary" onClick={handleClear}>
             Clear all
           </Button>
         </div>
@@ -514,7 +514,7 @@ export function DataTable<TData extends RowData>({
                   <TableHead
                     key={header.id}
                     className={cn(
-                      "text-sm font-semibold uppercase text-gray-700 px-3 h-10",
+                      "text-sm font-semibold uppercase text-gray-700 px-3 h-9",
                       header.column.getCanSort() && "cursor-pointer select-none",
                     )}
                     style={{ width: (header.column.columnDef as any).size }}

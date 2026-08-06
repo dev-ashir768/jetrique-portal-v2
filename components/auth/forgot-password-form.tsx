@@ -94,7 +94,6 @@ export function ForgotPasswordForm() {
 
       <Button
         type="submit"
-        size="lg"
         className="mt-2 w-full"
         disabled={mutation.isPending}
       >

@@ -26,7 +26,6 @@ export function UserMenu() {
       <PopoverTrigger asChild>
         <Button
           type="button"
-          size="lg"
           className="px-0"
         >
           <div className="flex h-7 w-7 items-center justify-center rounded-md bg-topbar-foreground text-xs font-medium text-topbar">

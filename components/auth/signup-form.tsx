@@ -201,7 +201,6 @@ export function SignupForm() {
 
       <Button
         type="submit"
-        size="lg"
         className="mt-2 w-full"
         disabled={signup.isPending}
       >

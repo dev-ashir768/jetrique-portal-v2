@@ -22,7 +22,7 @@ function classNames<
   return {
     control: ({ isFocused, isDisabled }) =>
       cn(
-        "!min-h-10 w-full rounded-md border border-input bg-transparent px-2.5 text-sm shadow-xs transition-[color,box-shadow]",
+        "!min-h-9 w-full rounded-md border border-input bg-transparent px-2.5 text-sm shadow-xs transition-[color,box-shadow]",
         isFocused && "border-ring ring-3 ring-ring/50",
         isDisabled && "cursor-not-allowed opacity-50",
         "dark:bg-input/30",
