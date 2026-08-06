@@ -1,11 +1,11 @@
 import z from "zod"
 
 export const createMenuSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  slug: z.string().min(1, "Slug is required"),
-  icon: z.string().min(1, "Icon is required"),
+  name: z.string().trim().min(1, "Name is required"),
+  slug: z.string().trim().min(1, "Slug is required"),
+  icon: z.string().trim().min(1, "Icon is required"),
   order: z.number().int().min(1, "Order must be at least 1"),
-  path: z.string().optional(),
+  path: z.string().trim().optional(),
   parentId: z.string().optional(),
 })
 

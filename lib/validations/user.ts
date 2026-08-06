@@ -1,17 +1,17 @@
 import { z } from "zod"
 
 export const createUserSchema = z.object({
-  email: z.email("Invalid email address"),
-  firstName: z.string().min(2, "First name is required"),
-  lastName: z.string().min(2, "Last name is required"),
-  phone: z.string().min(10, "Valid phone number is required"),
+  email: z.string().trim().email("Invalid email address"),
+  firstName: z.string().trim().min(2, "First name is required"),
+  lastName: z.string().trim().min(2, "Last name is required"),
+  phone: z.string().trim().min(10, "Valid phone number is required"),
   role: z.enum(["SUPER_ADMIN", "ORG_ADMIN", "OPERATOR", "AGENT", "USER"]),
 })
 
 export const profileSchema = z.object({
-  firstName: z.string().min(2, "First name is required"),
-  lastName: z.string().min(2, "Last name is required"),
-  phone: z.string().min(10, "Valid phone number is required"),
+  firstName: z.string().trim().min(2, "First name is required"),
+  lastName: z.string().trim().min(2, "Last name is required"),
+  phone: z.string().trim().min(10, "Valid phone number is required"),
 })
 
 export const commissionSchema = z.object({

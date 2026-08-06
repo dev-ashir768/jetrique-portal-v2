@@ -3,9 +3,8 @@
 import { useState } from "react"
 import { useForm, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { z } from "zod"
 import { toast } from "sonner"
-import { isValidPhoneNumber } from "libphonenumber-js"
+import { makeRegisterSchema, type RegisterFormValues } from "@/lib/validations/auth"
 import { Plane, Briefcase, MapPin, Globe, Building2, Eye, EyeOff, Upload, X, CheckCircle2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -37,36 +36,6 @@ const STEP1_FIELDS = [
 
 const STEP2_FIELDS = ["adminName", "adminEmail", "adminPassword"] as const
 
-function makeSchema(countryCode: string | null) {
-  return z.object({
-    organizationName: z.string().min(2, "Organization name is required"),
-    organizationEmail: z.email("Invalid email address"),
-    organizationPhone: z
-      .string()
-      .min(1, "Phone number is required")
-      .refine(
-        (val) => {
-          if (!countryCode) return val.length >= 7
-          try {
-            return isValidPhoneNumber(val, countryCode as Parameters<typeof isValidPhoneNumber>[1])
-          } catch {
-            return false
-          }
-        },
-        { message: countryCode ? `Invalid phone number for ${countryCode}` : "Invalid phone number" }
-      ),
-    countryId: z.string().min(1, "Country is required"),
-    provinceId: z.string().min(1, "Province is required"),
-    cityId: z.string().min(1, "City is required"),
-    registrationNumber: z.string().min(1, "Registration number is required"),
-    address: z.string().min(5, "Address is required"),
-    adminName: z.string().min(2, "Admin name is required"),
-    adminEmail: z.email("Invalid email address"),
-    adminPassword: z.string().min(8, "Password must be at least 8 characters"),
-  })
-}
-
-type FormValues = z.infer<ReturnType<typeof makeSchema>>
 
 
 // ─── Document Upload ───────────────────────────────────────────────────────
@@ -145,8 +114,8 @@ export function RegisterForm() {
     setValue,
     control,
     formState: { errors },
-  } = useForm<FormValues>({
-    resolver: zodResolver(makeSchema(countryCode)),
+  } = useForm<RegisterFormValues>({
+    resolver: zodResolver(makeRegisterSchema(countryCode)),
     defaultValues: { countryId: "", provinceId: "", cityId: "" },
   })
 

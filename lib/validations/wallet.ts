@@ -2,8 +2,8 @@ import { z } from "zod"
 
 export const topUpSchema = z.object({
   amount: z.number().min(100, "Minimum top-up is $100"),
-  paymentMethod: z.string().min(1, "Select a payment method"),
-  reference: z.string().optional(),
+  paymentMethod: z.string().trim().min(1, "Select a payment method"),
+  reference: z.string().trim().optional(),
 })
 
 export const budgetAllocationSchema = z.object({
