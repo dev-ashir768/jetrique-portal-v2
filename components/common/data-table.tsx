@@ -412,96 +412,96 @@ export function DataTable<TData extends RowData>({
   return (
     <div className="flex flex-col gap-0 rounded-md bg-white overflow-hidden">
       {/* Toolbar */}
-      <div className="flex flex-col justify-between gap-2 p-2.5">
-        <div className="flex items-center gap-2">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-2.5">
+        <div className="flex flex-1 flex-wrap items-center gap-3">
           {onSearch && (
             <Input
               placeholder={searchPlaceholder}
               value={searchValue}
               onChange={(e) => handleSearch(e.target.value)}
-              className="max-w-xs"
+              className="w-full sm:max-w-xs"
             />
           )}
 
-          <div className="ml-auto flex items-center gap-1.5">
-            {onRefetch && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button variant="outline" size="icon" className="h-8 w-8" onClick={onRefetch}>
-                    <RefreshCw className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Refresh</TooltipContent>
-              </Tooltip>
-            )}
-
-            {filters && filters.length > 0 && onFilterChange && (
-              <FilterDialog
-                filters={filters}
-                activeFilters={activeFilters}
-                onFilterChange={onFilterChange}
-              />
-            )}
-
-            <DropdownMenu>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="icon" className="h-8 w-8">
-                      <Columns3 className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                </TooltipTrigger>
-                <TooltipContent>Columns</TooltipContent>
-              </Tooltip>
-              <DropdownMenuContent align="end" className="w-44">
-                <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                {table.getAllColumns()
-                  .filter((col) => col.getCanHide())
-                  .map((col) => (
-                    <DropdownMenuCheckboxItem
-                      key={col.id}
-                      checked={col.getIsVisible()}
-                      onCheckedChange={(v) => col.toggleVisibility(!!v)}
-                      className="capitalize"
-                    >
-                      {typeof col.columnDef.header === "string" ? col.columnDef.header : col.id}
-                    </DropdownMenuCheckboxItem>
-                  ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            <DropdownMenu>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="icon" className="h-8 w-8">
-                      <Download className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                </TooltipTrigger>
-                <TooltipContent>Export</TooltipContent>
-              </Tooltip>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => exportToCSV(data, columns as any[], exportFileName)}>
-                  Export as CSV
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => exportToExcel(data, columns as any[], exportFileName)}>
-                  Export as Excel
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+          {filters && (
+            <ActiveFilterBadges
+              filters={filters}
+              activeFilters={activeFilters}
+              onRemove={handleFilterRemove}
+            />
+          )}
         </div>
 
-        {filters && (
-          <ActiveFilterBadges
-            filters={filters}
-            activeFilters={activeFilters}
-            onRemove={handleFilterRemove}
-          />
-        )}
+        <div className="flex items-center gap-1.5 self-end sm:self-auto">
+          {onRefetch && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="outline" size="icon" className="h-8 w-8" onClick={onRefetch}>
+                  <RefreshCw className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Refresh</TooltipContent>
+            </Tooltip>
+          )}
+
+          {filters && filters.length > 0 && onFilterChange && (
+            <FilterDialog
+              filters={filters}
+              activeFilters={activeFilters}
+              onFilterChange={onFilterChange}
+            />
+          )}
+
+          <DropdownMenu>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="icon" className="h-8 w-8">
+                    <Columns3 className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+              </TooltipTrigger>
+              <TooltipContent>Columns</TooltipContent>
+            </Tooltip>
+            <DropdownMenuContent align="end" className="w-44">
+              <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {table.getAllColumns()
+                .filter((col) => col.getCanHide())
+                .map((col) => (
+                  <DropdownMenuCheckboxItem
+                    key={col.id}
+                    checked={col.getIsVisible()}
+                    onCheckedChange={(v) => col.toggleVisibility(!!v)}
+                    className="capitalize"
+                  >
+                    {typeof col.columnDef.header === "string" ? col.columnDef.header : col.id}
+                  </DropdownMenuCheckboxItem>
+                ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <DropdownMenu>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="icon" className="h-8 w-8">
+                    <Download className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+              </TooltipTrigger>
+              <TooltipContent>Export</TooltipContent>
+            </Tooltip>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => exportToCSV(data, columns as any[], exportFileName)}>
+                Export as CSV
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => exportToExcel(data, columns as any[], exportFileName)}>
+                Export as Excel
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
 
       {/* Table */}
