@@ -61,8 +61,7 @@ export function useRegister() {
 
   return useMutation({
     mutationFn: (payload: FormData) => authApi.register(payload),
-    onSuccess: ({ data }) => {
-      toast.success(data.data?.message ?? "Registration submitted successfully")
+    onSuccess: () => {
       router.push("/login")
     },
     onError: (error: any) => {
