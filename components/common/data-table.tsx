@@ -10,7 +10,6 @@ import {
   columnVisibilityFeature,
   rowSortingFeature,
   rowPaginationFeature,
-  createCoreRowModel,
   createSortedRowModel,
   createPaginatedRowModel,
 } from "@tanstack/table-core"
@@ -258,7 +257,7 @@ function FilterDialog({
       <DialogTrigger asChild>
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="outline" size="icon" className="relative h-9 w-9">
+            <Button variant="outline" size="icon" className="relative h-10 w-10">
               <ListFilter className="h-4 w-4" />
               {activeCount > 0 && (
                 <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] text-primary-foreground">
@@ -438,7 +437,7 @@ export function DataTable<TData extends RowData>({
             {onRefetch && (
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button variant="outline" size="icon" className="h-9 w-9" onClick={onRefetch}>
+                  <Button variant="outline" size="icon" className="h-10 w-10" onClick={onRefetch}>
                     <RefreshCw className="h-4 w-4" />
                   </Button>
                 </TooltipTrigger>
@@ -458,7 +457,7 @@ export function DataTable<TData extends RowData>({
               <DropdownMenuTrigger asChild>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Button variant="outline" size="icon" className="h-9 w-9">
+                    <Button variant="outline" size="icon" className="h-10 w-10">
                       <Columns3 className="h-4 w-4" />
                     </Button>
                   </TooltipTrigger>
@@ -487,7 +486,7 @@ export function DataTable<TData extends RowData>({
               <DropdownMenuTrigger asChild>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Button variant="outline" size="icon" className="h-9 w-9">
+                    <Button variant="outline" size="icon" className="h-10 w-10">
                       <Download className="h-4 w-4" />
                     </Button>
                   </TooltipTrigger>
@@ -525,7 +524,7 @@ export function DataTable<TData extends RowData>({
                   <TableHead
                     key={header.id}
                     className={cn(
-                      "text-xs font-semibold uppercase tracking-wide text-gray-500 px-3 h-9",
+                      "text-sm font-semibold uppercase text-gray-700 px-3 h-10",
                       header.column.getCanSort() && "cursor-pointer select-none",
                     )}
                     style={{ width: (header.column.columnDef as any).size }}
@@ -554,7 +553,7 @@ export function DataTable<TData extends RowData>({
               ))
             ) : table.getRowModel().rows.length === 0 ? (
               <TableRow className="hover:bg-transparent">
-                <TableCell colSpan={columns.length} className="py-16 text-center text-sm text-muted-foreground">
+                <TableCell colSpan={columns.length} className="py-16 text-center text-sm text-gray-700">
                   {emptyMessage}
                 </TableCell>
               </TableRow>
