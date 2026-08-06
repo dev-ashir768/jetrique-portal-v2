@@ -18,6 +18,7 @@ import { ReactSelectSingle } from "@/components/ui/react-select"
 import { useCreateMenu, useAllMenus } from "@/hooks/use-rbac"
 import { CreateMenuFormValues, createMenuSchema } from "@/lib/validations/rbac"
 import { Can } from "@/components/common"
+import type { MenuItem } from "@/types"
 
 
 function toSlug(name: string) {
@@ -29,7 +30,7 @@ export function CreateMenuDialog() {
   const { mutateAsync, isPending } = useCreateMenu()
   const { data: menusData } = useAllMenus()
 
-  const parentOptions = (menusData?.items ?? []).map((m) => ({
+  const parentOptions = (menusData?.items ?? []).map((m: MenuItem) => ({
     label: m.name,
     value: m.id,
   }))
