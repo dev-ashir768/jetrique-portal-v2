@@ -1,9 +1,7 @@
 import { apiClient } from "./client"
+import type { ApiResponse, Location } from "@/types"
 
 export const publicApi = {
-  getLocationTree: () =>
-    apiClient.get("/public/locations"),
-
-  getLocationTreeFiltered: (params: { country?: string; state?: string; type?: string }) =>
-    apiClient.get("/public/locations/filter", { params }),
+  getLocations: (params: { type: string; parentId?: string }) =>
+    apiClient.get<ApiResponse<Location[]>>("/locations", { params }),
 }

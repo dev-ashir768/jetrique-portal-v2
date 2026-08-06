@@ -1,16 +1,19 @@
 "use client"
 
 import { useState } from "react"
-import { useForm } from "react-hook-form"
+import { useForm, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { toast } from "sonner"
+import { isValidPhoneNumber } from "libphonenumber-js"
 import { Plane, Briefcase, MapPin, Globe, Building2, User, Eye, EyeOff, Upload, X, CheckCircle2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { ReactSelectSingle, type SelectOption } from "@/components/ui/react-select"
 import { useRegister } from "@/hooks/use-auth"
-import type { AgentCategory } from "@/types"
+import { useCountries, useProvinces, useCities } from "@/hooks/use-locations"
+import type { AgentCategory, Location } from "@/types"
 import {
   DOCUMENT_TYPES,
   AGENT_CATEGORIES,
@@ -18,7 +21,6 @@ import {
   REQUIRED_DOCUMENTS_BY_CATEGORY,
   REQUIRED_OPERATOR_DOCUMENTS,
 } from "@/lib/constants"
-import { RegisterFormValues, registerSchema } from "@/lib/validations"
 
 const DOCUMENT_LABELS = Object.fromEntries(DOCUMENT_TYPES.map((d) => [d.value, d.label]))
 
@@ -26,14 +28,48 @@ const STEP1_FIELDS = [
   "organizationName",
   "organizationEmail",
   "organizationPhone",
-  "organizationPhoneCountry",
+  "countryId",
+  "provinceId",
+  "cityId",
   "registrationNumber",
   "address",
-  "cityId",
 ] as const
 
 const STEP2_FIELDS = ["adminName", "adminEmail", "adminPassword"] as const
 
+function makeSchema(countryCode: string | null) {
+  return z.object({
+    organizationName: z.string().min(2, "Organization name is required"),
+    organizationEmail: z.email("Invalid email address"),
+    organizationPhone: z
+      .string()
+      .min(1, "Phone number is required")
+      .refine(
+        (val) => {
+          if (!countryCode) return val.length >= 7
+          try {
+            return isValidPhoneNumber(val, countryCode as Parameters<typeof isValidPhoneNumber>[1])
+          } catch {
+            return false
+          }
+        },
+        { message: countryCode ? `Invalid phone number for ${countryCode}` : "Invalid phone number" }
+      ),
+    countryId: z.string().min(1, "Country is required"),
+    provinceId: z.string().min(1, "Province is required"),
+    cityId: z.string().min(1, "City is required"),
+    registrationNumber: z.string().min(1, "Registration number is required"),
+    address: z.string().min(5, "Address is required"),
+    adminName: z.string().min(2, "Admin name is required"),
+    adminEmail: z.email("Invalid email address"),
+    adminPassword: z.string().min(8, "Password must be at least 8 characters"),
+  })
+}
+
+type FormValues = z.infer<ReturnType<typeof makeSchema>>
+
+
+// ─── Document Upload ───────────────────────────────────────────────────────
 
 interface DocumentUploadProps {
   docKey: string
@@ -83,6 +119,8 @@ function DocumentUpload({ docKey, required, value, onChange }: DocumentUploadPro
   )
 }
 
+// ─── Main Form ─────────────────────────────────────────────────────────────
+
 export function RegisterForm() {
   const [orgType, setOrgType] = useState<"OPERATOR" | "AGENT" | null>(null)
   const [agentCategory, setAgentCategory] = useState<AgentCategory | null>(null)
@@ -90,21 +128,47 @@ export function RegisterForm() {
   const [showPassword, setShowPassword] = useState(false)
   const [documents, setDocuments] = useState<Record<string, File | null>>({})
 
+  const [countryCode, setCountryCode] = useState<string | null>(null)
+  const [selectedCountryId, setSelectedCountryId] = useState<string | null>(null)
+  const [selectedProvinceId, setSelectedProvinceId] = useState<string | null>(null)
+
   const { mutateAsync, isPending } = useRegister()
+
+  const { data: countries = [], isLoading: countriesLoading } = useCountries()
+  const { data: provinces = [], isLoading: provincesLoading } = useProvinces(selectedCountryId)
+  const { data: cities = [], isLoading: citiesLoading } = useCities(selectedProvinceId)
 
   const {
     register,
     trigger,
     getValues,
+    setValue,
+    control,
     formState: { errors },
-  } = useForm<RegisterFormValues>({
-    resolver: zodResolver(registerSchema),
-    defaultValues: { organizationPhoneCountry: "PK" },
+  } = useForm<FormValues>({
+    resolver: zodResolver(makeSchema(countryCode)),
+    defaultValues: { countryId: "", provinceId: "", cityId: "" },
   })
+
+  function onCountryChange(countryId: string) {
+    const loc: Location | undefined = countries.find((c) => c.id === countryId)
+    setSelectedCountryId(countryId)
+    setCountryCode(loc?.code ?? null)
+    setSelectedProvinceId(null)
+    setValue("countryId", countryId)
+    setValue("provinceId", "")
+    setValue("cityId", "")
+  }
+
+  function onProvinceChange(provinceId: string) {
+    setSelectedProvinceId(provinceId)
+    setValue("provinceId", provinceId)
+    setValue("cityId", "")
+  }
 
   function getRequiredDocs(): string[] {
     if (orgType === "OPERATOR") return REQUIRED_OPERATOR_DOCUMENTS
-    if (orgType === "AGENT" && agentCategory) return REQUIRED_DOCUMENTS_BY_CATEGORY[agentCategory]
+    if (orgType === "AGENT" && agentCategory) return REQUIRED_DOCUMENTS_BY_CATEGORY[agentCategory] ?? []
     return []
   }
 
@@ -135,7 +199,7 @@ export function RegisterForm() {
     formData.append("organizationType", orgType)
     formData.append("organizationEmail", values.organizationEmail)
     formData.append("organizationPhone", values.organizationPhone)
-    formData.append("organizationPhoneCountry", values.organizationPhoneCountry)
+    formData.append("organizationPhoneCountry", countryCode ?? "")
     formData.append("registrationNumber", values.registrationNumber)
     formData.append("address", values.address)
     formData.append("cityId", values.cityId)
@@ -152,7 +216,7 @@ export function RegisterForm() {
     })
 
     toast.promise(mutateAsync(formData), {
-      loading: "Please wait...",
+      loading: "Please wait…",
       success: "Registration submitted!",
       error: (err: unknown) => {
         const e = err as { response?: { data?: { message?: string } } }
@@ -164,14 +228,15 @@ export function RegisterForm() {
   const docKeys = orgType === "OPERATOR"
     ? REQUIRED_OPERATOR_DOCUMENTS
     : orgType === "AGENT" && agentCategory
-      ? REQUIRED_DOCUMENTS_BY_CATEGORY[agentCategory]
+      ? REQUIRED_DOCUMENTS_BY_CATEGORY[agentCategory] ?? []
       : []
 
   const requiredDocs = getRequiredDocs()
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Phase 0 — Type & Category */}
+
+      {/* Step 0 — Type & Category */}
       {step === 0 && (
         <div className="flex flex-col gap-6">
           <div className="grid grid-cols-2 gap-3">
@@ -180,7 +245,9 @@ export function RegisterForm() {
                 key={type}
                 type="button"
                 onClick={() => { setOrgType(type); if (type === "OPERATOR") setAgentCategory(null) }}
-                className={`flex flex-col items-start gap-2 rounded-md border-2 p-4 text-left transition-colors ${orgType === type ? "border-primary bg-primary/5" : "border-border bg-card hover:border-primary/50"}`}
+                className={`flex flex-col items-start gap-2 rounded-md border-2 p-4 text-left transition-colors ${
+                  orgType === type ? "border-primary bg-primary/5" : "border-border bg-card hover:border-primary/50"
+                }`}
               >
                 {type === "OPERATOR"
                   ? <Plane className={`h-6 w-6 ${orgType === "OPERATOR" ? "text-primary" : "text-muted-foreground"}`} />
@@ -202,7 +269,8 @@ export function RegisterForm() {
                 {([
                   { value: "TOUR_OPERATOR" as AgentCategory, Icon: MapPin },
                   { value: "TRAVEL_AGENT" as AgentCategory, Icon: Globe },
-                  { value: "HOTEL_PARTNER" as AgentCategory, Icon: Building2 }
+                  { value: "HOTEL_PARTNER" as AgentCategory, Icon: Building2 },
+                  { value: "GENERAL_AGENT" as AgentCategory, Icon: User },
                 ] as const).map(({ value, Icon }) => {
                   const cat = AGENT_CATEGORIES.find((c) => c.value === value)!
                   return (
@@ -210,7 +278,9 @@ export function RegisterForm() {
                       key={value}
                       type="button"
                       onClick={() => setAgentCategory(value)}
-                      className={`flex flex-col items-start gap-2 rounded-md border-2 p-3 text-left transition-colors ${agentCategory === value ? "border-primary bg-primary/5" : "border-border bg-card hover:border-primary/50"}`}
+                      className={`flex flex-col items-start gap-2 rounded-md border-2 p-3 text-left transition-colors ${
+                        agentCategory === value ? "border-primary bg-primary/5" : "border-border bg-card hover:border-primary/50"
+                      }`}
                     >
                       <Icon className={`h-5 w-5 ${agentCategory === value ? "text-primary" : "text-muted-foreground"}`} />
                       <div className="text-sm font-semibold text-card-foreground">{cat.label}</div>
@@ -234,7 +304,7 @@ export function RegisterForm() {
       {/* Steps 1–3 */}
       {step >= 1 && step <= 3 && (
         <div className="flex flex-col gap-5">
-          {/* Progress indicator */}
+          {/* Progress */}
           <div className="flex items-center gap-2">
             {[1, 2, 3].map((s) => (
               <div key={s} className="flex flex-1 items-center gap-2">
@@ -250,46 +320,110 @@ export function RegisterForm() {
             ))}
           </div>
 
-          {/* Step 1 — Organization */}
+          {/* Step 1 — Organization Details */}
           {step === 1 && (
             <div className="flex flex-col gap-4">
               <p className="text-sm font-medium text-muted-foreground">Step 1 of 3 — Organization Details</p>
               <div className="grid grid-cols-2 gap-3">
+
                 <div className="col-span-2 flex flex-col gap-1.5">
                   <Label htmlFor="organizationName">Organization Name <span className="text-destructive">*</span></Label>
                   <Input id="organizationName" placeholder="Acme Aviation Ltd." {...register("organizationName")} />
                   {errors.organizationName && <p className="text-xs text-destructive">{errors.organizationName.message}</p>}
                 </div>
-                <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="organizationEmail">Email <span className="text-destructive">*</span></Label>
+
+                <div className="col-span-2 flex flex-col gap-1.5">
+                  <Label htmlFor="organizationEmail">Organization Email <span className="text-destructive">*</span></Label>
                   <Input id="organizationEmail" type="email" placeholder="org@example.com" {...register("organizationEmail")} />
                   {errors.organizationEmail && <p className="text-xs text-destructive">{errors.organizationEmail.message}</p>}
                 </div>
+
+                <div className="col-span-2 flex flex-col gap-1.5">
+                  <Label>Country <span className="text-destructive">*</span></Label>
+                  <Controller
+                    control={control}
+                    name="countryId"
+                    render={({ field }) => (
+                      <ReactSelectSingle<SelectOption>
+                        placeholder={countriesLoading ? "Loading…" : "Select country"}
+                        options={countries.map((c) => ({ label: c.name, value: c.id }))}
+                        value={countries.map((c) => ({ label: c.name, value: c.id })).find((o) => o.value === field.value) ?? null}
+                        onChange={(opt) => { const v = opt?.value ?? ""; field.onChange(v); onCountryChange(v) }}
+                        isLoading={countriesLoading}
+                        isClearable
+                      />
+                    )}
+                  />
+                  {errors.countryId && <p className="text-xs text-destructive">{errors.countryId.message}</p>}
+                </div>
+
                 <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="organizationPhone">Phone <span className="text-destructive">*</span></Label>
-                  <Input id="organizationPhone" placeholder="+92 300 0000000" {...register("organizationPhone")} />
+                  <Label>Province <span className="text-destructive">*</span></Label>
+                  <Controller
+                    control={control}
+                    name="provinceId"
+                    render={({ field }) => (
+                      <ReactSelectSingle<SelectOption>
+                        placeholder={!selectedCountryId ? "Select country first" : provincesLoading ? "Loading…" : "Select province"}
+                        options={provinces.map((p) => ({ label: p.name, value: p.id }))}
+                        value={provinces.map((p) => ({ label: p.name, value: p.id })).find((o) => o.value === field.value) ?? null}
+                        onChange={(opt) => { const v = opt?.value ?? ""; field.onChange(v); onProvinceChange(v) }}
+                        isDisabled={!selectedCountryId}
+                        isLoading={provincesLoading}
+                        isClearable
+                      />
+                    )}
+                  />
+                  {errors.provinceId && <p className="text-xs text-destructive">{errors.provinceId.message}</p>}
+                </div>
+
+                <div className="flex flex-col gap-1.5">
+                  <Label>City <span className="text-destructive">*</span></Label>
+                  <Controller
+                    control={control}
+                    name="cityId"
+                    render={({ field }) => (
+                      <ReactSelectSingle<SelectOption>
+                        placeholder={!selectedProvinceId ? "Select province first" : citiesLoading ? "Loading…" : "Select city"}
+                        options={cities.map((c) => ({ label: c.name, value: c.id }))}
+                        value={cities.map((c) => ({ label: c.name, value: c.id })).find((o) => o.value === field.value) ?? null}
+                        onChange={(opt) => field.onChange(opt?.value ?? "")}
+                        isDisabled={!selectedProvinceId}
+                        isLoading={citiesLoading}
+                        isClearable
+                      />
+                    )}
+                  />
+                  {errors.cityId && <p className="text-xs text-destructive">{errors.cityId.message}</p>}
+                </div>
+
+                <div className="col-span-2 flex flex-col gap-1.5">
+                  <Label htmlFor="organizationPhone">
+                    Phone <span className="text-destructive">*</span>
+                    {countryCode && (
+                      <span className="ml-2 rounded bg-muted px-1.5 py-0.5 text-xs font-mono text-muted-foreground">{countryCode}</span>
+                    )}
+                  </Label>
+                  <Input
+                    id="organizationPhone"
+                    placeholder={countryCode === "PK" ? "+92 300 0000000" : "+1 555 000 0000"}
+                    {...register("organizationPhone")}
+                  />
                   {errors.organizationPhone && <p className="text-xs text-destructive">{errors.organizationPhone.message}</p>}
                 </div>
+
                 <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="organizationPhoneCountry">Phone Country <span className="text-destructive">*</span></Label>
-                  <Input id="organizationPhoneCountry" placeholder="PK" {...register("organizationPhoneCountry")} />
-                  {errors.organizationPhoneCountry && <p className="text-xs text-destructive">{errors.organizationPhoneCountry.message}</p>}
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="registrationNumber">Registration Number <span className="text-destructive">*</span></Label>
+                  <Label htmlFor="registrationNumber">Registration No. <span className="text-destructive">*</span></Label>
                   <Input id="registrationNumber" placeholder="REG-12345" {...register("registrationNumber")} />
                   {errors.registrationNumber && <p className="text-xs text-destructive">{errors.registrationNumber.message}</p>}
                 </div>
-                <div className="col-span-2 flex flex-col gap-1.5">
+
+                <div className="flex flex-col gap-1.5">
                   <Label htmlFor="address">Address <span className="text-destructive">*</span></Label>
                   <Input id="address" placeholder="123 Main Street, Karachi" {...register("address")} />
                   {errors.address && <p className="text-xs text-destructive">{errors.address.message}</p>}
                 </div>
-                <div className="col-span-2 flex flex-col gap-1.5">
-                  <Label htmlFor="cityId">City <span className="text-destructive">*</span></Label>
-                  <Input id="cityId" placeholder="City UUID" {...register("cityId")} />
-                  {errors.cityId && <p className="text-xs text-destructive">{errors.cityId.message}</p>}
-                </div>
+
               </div>
               <div className="flex gap-3">
                 <Button type="button" variant="outline" className="h-10 flex-1" onClick={() => setStep(0)}>Back</Button>
@@ -363,7 +497,7 @@ export function RegisterForm() {
               <div className="flex gap-3">
                 <Button type="button" variant="outline" className="h-10 flex-1" onClick={() => setStep(2)}>Back</Button>
                 <Button type="button" className="h-10 flex-1" disabled={isPending} onClick={handleSubmit}>
-                  {isPending ? "Submitting..." : "Submit"}
+                  {isPending ? "Submitting…" : "Submit"}
                 </Button>
               </div>
             </div>
