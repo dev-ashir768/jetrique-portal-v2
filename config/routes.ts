@@ -1,0 +1,38 @@
+export const ROUTES = {
+  AUTH: {
+    LOGIN: "/login",
+    SIGNUP: "/signup",
+    FORGOT_PASSWORD: "/forgot-password",
+    RESET_PASSWORD: "/reset-password",
+    VERIFY_EMAIL: "/verify-email",
+  },
+  DASHBOARD: {
+    HOME: "/dashboard",
+    FLEET: "/fleet",
+    FLEET_DETAIL: (id: string) => `/fleet/${id}`,
+    BOOKINGS: "/bookings",
+    BOOKING_DETAIL: (id: string) => `/bookings/${id}`,
+    NEW_BOOKING: "/bookings/new",
+    WALLET: "/wallet",
+    TEAM: "/team",
+    DOCUMENTS: "/documents",
+    NOTIFICATIONS: "/notifications",
+    SETTINGS: {
+      ROOT: "/settings",
+      PROFILE: "/settings/profile",
+      SECURITY: "/settings/security",
+      NOTIFICATIONS: "/settings/notifications",
+    },
+  },
+  ADMIN: {
+    ORGANIZATIONS: "/admin/organizations",
+    ORGANIZATION_DETAIL: (id: string) => `/admin/organizations/${id}`,
+    USERS: "/admin/users",
+    USER_DETAIL: (id: string) => `/admin/users/${id}`,
+    BOOKINGS: "/admin/bookings",
+    WALLET: "/admin/wallet",
+    ANALYTICS: "/admin/analytics",
+    RBAC: "/admin/rbac",
+    SETTINGS: "/admin/settings",
+  },
+} as const
