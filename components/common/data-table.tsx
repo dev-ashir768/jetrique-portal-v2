@@ -299,11 +299,11 @@ function FilterDialog({
           ))}
         </div>
         <div className="flex justify-center gap-2">
-          <Button size="sm" onClick={handleApply}>
-            Apply
+          <Button size="lg" onClick={handleApply}>
+            Apply Filter
           </Button>
-          <Button variant="secondary" size="sm" onClick={handleClear}>
-            Clear
+          <Button variant="secondary" size="lg" onClick={handleClear}>
+            Clear all
           </Button>
         </div>
       </DialogContent>
