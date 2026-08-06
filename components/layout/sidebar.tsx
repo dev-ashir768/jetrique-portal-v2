@@ -38,10 +38,10 @@ function NavLink({
           ? "bg-sidebar-accent text-sidebar-accent-foreground"
           : "text-muted-foreground hover:bg-sidebar-accent/50 hover:text-foreground",
         isCollapsed && "justify-center px-2",
-        indent && !isCollapsed && "pl-9",
+        indent && !isCollapsed && "pl-5 ml-1",
       )}
     >
-      <Icon className="h-4.5 w-4.5 shrink-0" />
+      {!indent && !isCollapsed && <Icon className="h-4.5 w-4.5 shrink-0" />}
       {!isCollapsed && <span>{item.name}</span>}
     </Link>
   )
@@ -89,7 +89,7 @@ function NavDropdown({
         )}
       </button>
       {open && !isCollapsed && (
-        <div className="flex flex-col gap-0.5">
+        <div className="ml-4.5 border-l border-border pl-0 flex flex-col gap-0.5">
           {item.children.map((child) => (
             <NavLink key={child.id} item={child} isCollapsed={false} indent />
           ))}
@@ -155,7 +155,7 @@ export function Sidebar() {
       <aside
         className={cn(
           "hidden flex-col rounded-tl-xl transition-all duration-300 md:flex",
-          isCollapsed ? "w-16" : "w-56",
+          isCollapsed ? "w-16" : "w-58",
         )}
       >
         <SidebarContent isCollapsed={isCollapsed} />
