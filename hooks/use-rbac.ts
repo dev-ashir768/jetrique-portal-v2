@@ -37,6 +37,18 @@ export function useToggleMenuActive() {
   return useMutation({
     mutationFn: ({ id, isActive }: { id: string; isActive: boolean }) =>
       rbacApi.toggleMenuActive(id, isActive),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["rbac", "all-menus"] }),
+    onMutate: () => {
+      const id = toast.loading("Please wait...")
+      return { toastId: id }
+    },
+    onSuccess: (_data, _vars, ctx) => {
+      toast.dismiss(ctx?.toastId)
+      toast.success("Status updated")
+      qc.invalidateQueries({ queryKey: ["rbac", "all-menus"] })
+    },
+    onError: (_err, _vars, ctx) => {
+      toast.dismiss(ctx?.toastId)
+      toast.error("Failed to update status")
+    },
   })
 }
