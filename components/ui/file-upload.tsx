@@ -1,5 +1,5 @@
 "use client";
-/* eslint-disable react-hooks/immutability */
+/* eslint-disable react-hooks/immutability, jsx-a11y/role-supports-aria-props, @next/next/no-img-element */
 
 import {
   FileArchiveIcon,
