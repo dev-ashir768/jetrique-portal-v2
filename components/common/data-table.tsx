@@ -258,7 +258,7 @@ function FilterDialog({
       <Tooltip>
         <TooltipTrigger asChild>
           <DialogTrigger asChild>
-            <Button variant="outline" size="icon" className="relative h-10 w-10">
+            <Button variant="outline" size="icon" className="relative h-8 w-8">
               <ListFilter className="h-4 w-4" />
               {activeCount > 0 && (
                 <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] text-primary-foreground">
@@ -432,7 +432,7 @@ export function DataTable<TData extends RowData>({
             {onRefetch && (
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button variant="outline" size="icon" className="h-10 w-10" onClick={onRefetch}>
+                  <Button variant="outline" size="icon" className="h-8 w-8" onClick={onRefetch}>
                     <RefreshCw className="h-4 w-4" />
                   </Button>
                 </TooltipTrigger>
@@ -452,7 +452,7 @@ export function DataTable<TData extends RowData>({
               <Tooltip>
                 <TooltipTrigger asChild>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="icon" className="h-10 w-10">
+                    <Button variant="outline" size="icon" className="h-8 w-8">
                       <Columns3 className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
@@ -481,7 +481,7 @@ export function DataTable<TData extends RowData>({
               <Tooltip>
                 <TooltipTrigger asChild>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="icon" className="h-10 w-10">
+                    <Button variant="outline" size="icon" className="h-8 w-8">
                       <Download className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
@@ -583,7 +583,7 @@ export function DataTable<TData extends RowData>({
             value={String(pagination.limit)}
             onValueChange={(v) => onPaginationChange(1, Number(v))}
           >
-            <SelectTrigger className="w-17.5 h-10">
+            <SelectTrigger className="w-17.5 h-8!">
               <SelectValue />
             </SelectTrigger>
             <SelectContent position="popper" align="start">
@@ -601,7 +601,7 @@ export function DataTable<TData extends RowData>({
                 <Button
                   variant="outline"
                   size="icon"
-                  className="h-10 w-10"
+                  className="h-8 w-8"
                   onClick={() => onPaginationChange(1, pagination.limit)}
                   disabled={pagination.page <= 1}
                 >
@@ -615,7 +615,7 @@ export function DataTable<TData extends RowData>({
                 <Button
                   variant="outline"
                   size="icon"
-                  className="h-10 w-10"
+                  className="h-8 w-8"
                   onClick={() => onPaginationChange(pagination.page - 1, pagination.limit)}
                   disabled={pagination.page <= 1}
                 >
@@ -634,7 +634,7 @@ export function DataTable<TData extends RowData>({
                 <Button
                   variant="outline"
                   size="icon"
-                  className="h-10 w-10"
+                  className="h-8 w-8"
                   onClick={() => onPaginationChange(pagination.page + 1, pagination.limit)}
                   disabled={pagination.page >= pagination.pages}
                 >
@@ -648,7 +648,7 @@ export function DataTable<TData extends RowData>({
                 <Button
                   variant="outline"
                   size="icon"
-                  className="h-10 w-10"
+                  className="h-8 w-8"
                   onClick={() => onPaginationChange(pagination.pages, pagination.limit)}
                   disabled={pagination.page >= pagination.pages}
                 >
