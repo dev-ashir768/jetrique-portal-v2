@@ -35,8 +35,9 @@ export function useTopUp() {
       qc.invalidateQueries({ queryKey: ["wallet"] })
       qc.invalidateQueries({ queryKey: ["wallet-transactions"] })
     },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onError: (error: any) => {
-      toast.error(error.response?.data?.message ||"Top-up failed")
+      toast.error(error.response?.data?.message || "Top-up failed")
     },
   })
 }
@@ -50,8 +51,9 @@ export function useAllocateBudget() {
       toast.success("Budget allocated successfully")
       qc.invalidateQueries({ queryKey: ["wallet"] })
     },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onError: (error: any) => {
-      toast.error(error.response?.data?.message ||"Budget allocation failed")
+      toast.error(error.response?.data?.message || "Budget allocation failed")
     },
   })
 }

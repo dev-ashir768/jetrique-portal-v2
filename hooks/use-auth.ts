@@ -1,4 +1,5 @@
 "use client"
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { useRouter } from "next/navigation"

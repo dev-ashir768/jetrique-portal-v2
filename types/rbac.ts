@@ -27,13 +27,20 @@ export interface MenusParams {
   limit?: number
   search?: string
   isActive?: boolean
-  sortBy?: string
-  sortOrder?: "asc" | "desc"
 }
 
 export interface MenusResponse {
   items: MenuItem[]
   meta: { total: number }
+}
+
+export interface CreateMenuPayload {
+  name: string
+  slug: string
+  icon: string
+  order: number
+  path?: string | null
+  parentId?: string | null
 }
 
 export interface Role {

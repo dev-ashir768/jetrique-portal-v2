@@ -1,5 +1,5 @@
 import { apiClient } from "./client"
-import type { MenusResponse, ApiResponse, MenuItem, MenusParams } from "@/types"
+import type { MenusResponse, ApiResponse, MenuItem, MenusParams, CreateMenuPayload } from "@/types"
 
 export const rbacApi = {
   getMyMenus: () =>
@@ -10,4 +10,7 @@ export const rbacApi = {
 
   toggleMenuActive: (id: string, isActive: boolean) =>
     apiClient.patch<ApiResponse<MenuItem>>(`/rbac/menus/${id}/active`, { isActive }),
+
+  createMenu: (payload: CreateMenuPayload) =>
+    apiClient.post<ApiResponse<MenuItem>>("/rbac/menus", payload),
 }

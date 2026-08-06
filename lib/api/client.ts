@@ -29,13 +29,13 @@ apiClient.interceptors.response.use(
   },
 )
 
-export function getErrorMessage(error: any): string {
-  const data = error?.response?.data as ApiError | undefined
+export function getErrorMessage(error: unknown): string {
+  const data = (error as { response?: { data?: ApiError } })?.response?.data
   if (data?.message) return data.message
   return "Something went wrong"
 }
 
-export function getFieldErrors(error: any): Record<string, string> | undefined {
-  const data = error?.response?.data as ApiError | undefined
+export function getFieldErrors(error: unknown): Record<string, string> | undefined {
+  const data = (error as { response?: { data?: ApiError } })?.response?.data
   return data?.errors
 }

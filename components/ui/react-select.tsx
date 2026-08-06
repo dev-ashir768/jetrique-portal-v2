@@ -4,6 +4,7 @@ import ReactSelect, {
   type ClassNamesConfig,
   type GroupBase,
   type Props,
+  type MultiValueRemoveProps,
 } from "react-select"
 import { X } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -61,7 +62,7 @@ function classNames<
   }
 }
 
-function MultiValueRemove(props: any) {
+function MultiValueRemove<Option>(props: MultiValueRemoveProps<Option>) {
   return (
     <div {...props.innerProps}>
       <X className="h-3 w-3" />

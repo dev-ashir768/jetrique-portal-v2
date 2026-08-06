@@ -32,7 +32,7 @@ export function ForgotPasswordForm() {
     onSuccess: () => {
       setSent(true)
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast.error(getErrorMessage(error))
     },
   })
