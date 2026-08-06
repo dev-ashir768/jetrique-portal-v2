@@ -70,6 +70,7 @@ import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import { ReactSelectSingle, type SelectOption } from "@/components/ui/react-select"
 import { cn } from "@/lib/utils"
 
 export const features = tableFeatures({
@@ -273,26 +274,20 @@ function FilterDialog({
         <DialogHeader>
           <DialogTitle>Filters</DialogTitle>
         </DialogHeader>
-        <div className="flex flex-col gap-4 py-2">
+        <div className="flex flex-col gap-4">
           {filters.map((filter) => (
             <div key={filter.key} className="flex flex-col gap-1.5">
               <Label className="text-xs">{filter.label}</Label>
               {filter.type === "select" ? (
-                <Select
-                  value={localFilters[filter.key] || ""}
-                  onValueChange={(v) => setLocalFilters((p) => ({ ...p, [filter.key]: v }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder={filter.placeholder || `Select ${filter.label}`} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {filter.options?.map((opt) => (
-                      <SelectItem key={opt.value} value={opt.value}>
-                        {opt.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <ReactSelectSingle
+                  options={filter.options ?? []}
+                  value={filter.options?.find((o) => o.value === localFilters[filter.key]) ?? null}
+                  onChange={(opt: SelectOption | null) =>
+                    setLocalFilters((p) => ({ ...p, [filter.key]: opt?.value ?? "" }))
+                  }
+                  placeholder={filter.placeholder || `Select ${filter.label}`}
+                  isClearable
+                />
               ) : (
                 <Input
                   placeholder={filter.placeholder || `Enter ${filter.label}`}
@@ -303,12 +298,12 @@ function FilterDialog({
             </div>
           ))}
         </div>
-        <div className="flex justify-between pt-2">
-          <Button variant="ghost" size="sm" onClick={handleClear}>
-            Clear all
-          </Button>
+        <div className="flex justify-center gap-2">
           <Button size="sm" onClick={handleApply}>
-            Apply filters
+            Apply
+          </Button>
+          <Button variant="secondary" size="sm" onClick={handleClear}>
+            Clear
           </Button>
         </div>
       </DialogContent>
@@ -422,7 +417,7 @@ export function DataTable<TData extends RowData>({
   return (
     <div className="flex flex-col gap-0 rounded-md bg-white overflow-hidden">
       {/* Toolbar */}
-      <div className="flex items-center gap-2 p-2.5 flex-wrap">
+      <div className="flex flex-col justify-between gap-2 p-2.5">
         <div className="flex items-center gap-2">
           {onSearch && (
             <Input
