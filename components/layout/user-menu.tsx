@@ -47,19 +47,19 @@ export function UserMenu() {
         <div className="flex flex-col pt-1">
           <Link
             href={ROUTES.DASHBOARD.SETTINGS.PROFILE}
-            className="flex items-center gap-2 rounded-lg p-1.5 text-xs transition-colors hover:bg-accent"
+            className="flex items-center gap-2 rounded-lg px-1.5 h-9 text-xs transition-colors hover:bg-accent"
           >
             <User className="h-3.5 w-3.5" /> Profile
           </Link>
           <Link
             href={ROUTES.DASHBOARD.SETTINGS.ROOT}
-            className="flex items-center gap-2 rounded-lg p-1.5 text-xs transition-colors hover:bg-accent"
+            className="flex items-center gap-2 rounded-lg px-1.5 h-9 text-xs transition-colors hover:bg-accent"
           >
             <Settings className="h-3.5 w-3.5" /> Settings
           </Link>
           <button
             onClick={logout}
-            className="flex w-full items-center gap-2 rounded-lg p-1.5 text-xs text-destructive transition-colors hover:bg-accent"
+            className="flex w-full items-center gap-2 rounded-lg px-1.5 h-9 text-xs text-destructive transition-colors hover:bg-accent"
           >
             <LogOut className="h-3.5 w-3.5" /> Logout
           </button>

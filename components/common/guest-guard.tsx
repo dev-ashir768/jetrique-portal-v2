@@ -5,22 +5,28 @@ import { useRouter } from "next/navigation"
 import { useAuthStore } from "@/stores"
 
 export function GuestGuard({ children }: { children: ReactNode }) {
-  const { isAuthenticated } = useAuthStore()
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
   const router = useRouter()
-  const [mounted, setMounted] = useState(false)
+  const [hydrated, setHydrated] = useState(() =>
+    typeof window !== "undefined" && useAuthStore.persist.hasHydrated()
+  )
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setMounted(true)
+    if (useAuthStore.persist.hasHydrated()) {
+      setHydrated(true)
+      return
+    }
+    const unsub = useAuthStore.persist.onFinishHydration(() => setHydrated(true))
+    return unsub
   }, [])
 
   useEffect(() => {
-    if (mounted && isAuthenticated) {
+    if (hydrated && isAuthenticated) {
       router.replace("/dashboard")
     }
-  }, [mounted, isAuthenticated, router])
+  }, [hydrated, isAuthenticated, router])
 
-  if (!mounted) return null
+  if (!hydrated) return null
 
   if (isAuthenticated) return null
 

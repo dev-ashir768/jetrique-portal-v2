@@ -1,5 +1,6 @@
 import type { ReactNode } from "react"
+import { GuestGuard } from "@/components/common"
 
 export default function AuthLayout({ children }: { children: ReactNode }) {
-  return <>{children}</>
+  return <GuestGuard>{children}</GuestGuard>
 }
