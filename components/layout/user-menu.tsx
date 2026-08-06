@@ -38,30 +38,30 @@ export function UserMenu() {
         {user && (
           <>
             <div className="px-2">
-              <p className="text-xs font-medium">{user.name}</p>
-              <p className="text-[11px] text-muted-foreground">{user.email}</p>
+              <p className="text-sm font-medium">{user.name}</p>
+              <p className="text-xs text-muted-foreground">{user.email}</p>
             <Separator className="mt-1 absolute inset-x-0"/>
             </div>
           </>
         )}
-        <div className="flex flex-col pt-1">
+        <div className="flex flex-col pt-1.5">
           <Link
             href={ROUTES.DASHBOARD.SETTINGS.PROFILE}
-            className="flex items-center gap-2 rounded-lg px-1.5 h-9 text-xs transition-colors hover:bg-accent"
+            className="flex items-center gap-2 rounded-lg px-1.5 h-9 text-sm transition-colors hover:bg-accent"
           >
-            <User className="h-3.5 w-3.5" /> Profile
+            <User className="size-4" /> Profile
           </Link>
           <Link
             href={ROUTES.DASHBOARD.SETTINGS.ROOT}
-            className="flex items-center gap-2 rounded-lg px-1.5 h-9 text-xs transition-colors hover:bg-accent"
+            className="flex items-center gap-2 rounded-lg px-1.5 h-9 text-sm transition-colors hover:bg-accent"
           >
-            <Settings className="h-3.5 w-3.5" /> Settings
+            <Settings className="size-4" /> Settings
           </Link>
           <button
             onClick={logout}
-            className="flex w-full items-center gap-2 rounded-lg px-1.5 h-9 text-xs text-destructive transition-colors hover:bg-accent"
+            className="flex w-full items-center gap-2 rounded-lg px-1.5 h-9 text-sm text-destructive transition-colors hover:bg-accent"
           >
-            <LogOut className="h-3.5 w-3.5" /> Logout
+            <LogOut className="size-4" /> Logout
           </button>
         </div>
       </PopoverContent>
