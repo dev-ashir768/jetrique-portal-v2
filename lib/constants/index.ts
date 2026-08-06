@@ -1,21 +1,9 @@
-export const ORGANIZATION_TYPES = [
-  { label: "Jetrique", value: "JETRIQUE" },
-  { label: "Operator", value: "OPERATOR" },
-  { label: "Agent", value: "AGENT" },
-] as const
 
-export const ORGANIZATION_STATUSES = [
-  { label: "Pending", value: "PENDING" },
-  { label: "Approved", value: "APPROVED" },
-  { label: "Rejected", value: "REJECTED" },
-  { label: "Suspended", value: "SUSPENDED" },
-] as const
 
 export const AGENT_CATEGORIES = [
   { label: "Tour Operator", value: "TOUR_OPERATOR" },
   { label: "Travel Agent", value: "TRAVEL_AGENT" },
   { label: "Hotel Partner", value: "HOTEL_PARTNER" },
-  { label: "General Agent", value: "GENERAL_AGENT" },
 ] as const
 
 export const LOCATION_TYPES = [
@@ -79,13 +67,30 @@ export const WALLET_TRANSACTION_STATUSES = [
   { label: "Rejected", value: "REJECTED" },
 ] as const
 
-export const USER_ROLES = [
-  { label: "Super Admin", value: "SUPER_ADMIN" },
-  { label: "Org Admin", value: "ORG_ADMIN" },
-  { label: "Operator", value: "OPERATOR" },
-  { label: "Agent", value: "AGENT" },
-  { label: "User", value: "USER" },
-] as const
-
 export const DEFAULT_PAGE_SIZE = 10
 export const TOKEN_KEY = "jetrique_token"
+
+export const DOCUMENT_FIELD_MAP: Record<string, string> = {
+  DTS_LICENSE: "dtsLicense",
+  NTN_CERTIFICATE: "ntnCertificate",
+  IATA_CERTIFICATE: "iataCertificate",
+  TRADE_LICENSE: "tradeLicense",
+  OWNER_CNIC_FRONT: "ownerCnicFront",
+  OWNER_CNIC_BACK: "ownerCnicBack",
+  OWNER_VISITING_CARD: "ownerVisitingCard",
+  AUTHORIZED_SIGNATORY_CNIC_FRONT: "authorizedSignatoryCnicFront",
+  AUTHORIZED_SIGNATORY_CNIC_BACK: "authorizedSignatoryCnicBack",
+  AUTHORIZED_SIGNATORY_VISITING_CARD: "authorizedSignatoryVisitingCard",
+  AOC: "aoc",
+  INSURANCE_CERTIFICATE: "insuranceCertificate",
+  C_OF_A: "cOfA",
+  OPS_SPECS: "opsSpecs",
+}
+
+export const REQUIRED_DOCUMENTS_BY_CATEGORY: Record<string, string[]> = {
+  TOUR_OPERATOR: ["DTS_LICENSE", "NTN_CERTIFICATE", "IATA_CERTIFICATE", "OWNER_CNIC_FRONT", "OWNER_CNIC_BACK", "OWNER_VISITING_CARD"],
+  TRAVEL_AGENT: ["DTS_LICENSE", "NTN_CERTIFICATE", "IATA_CERTIFICATE", "OWNER_CNIC_FRONT", "OWNER_CNIC_BACK", "OWNER_VISITING_CARD"],
+  HOTEL_PARTNER: ["DTS_LICENSE", "TRADE_LICENSE", "NTN_CERTIFICATE", "AUTHORIZED_SIGNATORY_CNIC_FRONT", "AUTHORIZED_SIGNATORY_CNIC_BACK", "AUTHORIZED_SIGNATORY_VISITING_CARD"]
+}
+
+export const REQUIRED_OPERATOR_DOCUMENTS: string[] = ["AOC", "INSURANCE_CERTIFICATE", "C_OF_A", "OPS_SPECS"]

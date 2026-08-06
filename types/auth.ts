@@ -1,4 +1,4 @@
-import type { OrganizationType, OrganizationStatus } from "./common"
+import type { OrganizationType, OrganizationStatus, AgentCategory } from "./common"
 
 export interface LoginPayload {
   email: string
@@ -48,4 +48,33 @@ export interface ResetPasswordPayload {
   token: string
   password: string
   confirmPassword: string
+}
+
+export interface RegisterPayload {
+  organizationName: string
+  organizationType: "OPERATOR" | "AGENT"
+  organizationEmail: string
+  organizationPhone: string
+  organizationPhoneCountry: string
+  registrationNumber: string
+  address: string
+  agentCategory?: AgentCategory
+  adminName: string
+  adminEmail: string
+  adminPassword: string
+  cityId: string
+  dtsLicense?: File
+  ntnCertificate?: File
+  iataCertificate?: File
+  tradeLicense?: File
+  ownerCnicFront?: File
+  ownerCnicBack?: File
+  ownerVisitingCard?: File
+  authorizedSignatoryCnicFront?: File
+  authorizedSignatoryCnicBack?: File
+  authorizedSignatoryVisitingCard?: File
+  aoc?: File
+  insuranceCertificate?: File
+  cOfA?: File
+  opsSpecs?: File
 }

@@ -16,6 +16,11 @@ export const authApi = {
   signup: (payload: SignupPayload) =>
     apiClient.post<ApiResponse<{ message: string }>>("/auth/signup", payload),
 
+  register: (payload: FormData) =>
+    apiClient.post<ApiResponse<{ message: string }>>("/auth/register", payload, {
+      headers: { "Content-Type": "multipart/form-data" },
+    }),
+
   me: () =>
     apiClient.get<ApiResponse<AuthUser>>("/auth/me"),
 

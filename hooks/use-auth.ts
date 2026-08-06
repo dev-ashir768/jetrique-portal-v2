@@ -56,6 +56,21 @@ export function useSignup(setError?: UseFormSetError<any>) {
   })
 }
 
+export function useRegister() {
+  const router = useRouter()
+
+  return useMutation({
+    mutationFn: (payload: FormData) => authApi.register(payload),
+    onSuccess: ({ data }) => {
+      toast.success(data.data?.message ?? "Registration submitted successfully")
+      router.push("/login")
+    },
+    onError: (error: any) => {
+      toast.error(getErrorMessage(error))
+    },
+  })
+}
+
 export function useCurrentUser() {
   const { setUser } = useAuthStore()
 

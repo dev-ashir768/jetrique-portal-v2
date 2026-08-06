@@ -49,7 +49,7 @@ export type OrganizationType = "JETRIQUE" | "OPERATOR" | "AGENT"
 
 export type OrganizationStatus = "PENDING" | "APPROVED" | "REJECTED" | "SUSPENDED"
 
-export type AgentCategory = "TOUR_OPERATOR" | "TRAVEL_AGENT" | "HOTEL_PARTNER" | "GENERAL_AGENT"
+export type AgentCategory = "TOUR_OPERATOR" | "TRAVEL_AGENT" | "HOTEL_PARTNER"
 
 export type LocationType = "COUNTRY" | "PROVINCE" | "CITY" | "AIRPORT"
 
