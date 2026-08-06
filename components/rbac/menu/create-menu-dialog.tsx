@@ -107,7 +107,7 @@ export function CreateMenuDialog() {
           {/* Order */}
           <div className="flex flex-col gap-1.5">
             <Label className="text-xs">Order</Label>
-            <Input type="number" min={1} placeholder="1" {...register("order")} />
+            <Input type="number" min={1} placeholder="1" {...register("order", { valueAsNumber: true })} />
             {errors.order && <p className="text-xs text-destructive">{errors.order.message}</p>}
           </div>
 

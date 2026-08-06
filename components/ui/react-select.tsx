@@ -62,7 +62,11 @@ function classNames<
   }
 }
 
-function MultiValueRemove<Option>(props: MultiValueRemoveProps<Option>) {
+function MultiValueRemove<
+  Option = any,
+  IsMulti extends boolean = boolean,
+  Group extends GroupBase<Option> = GroupBase<Option>,
+>(props: MultiValueRemoveProps<Option, IsMulti, Group>) {
   return (
     <div {...props.innerProps}>
       <X className="h-3 w-3" />

@@ -1,5 +1,5 @@
-import { MenusTable } from "./_components/menus-table"
-import { CreateMenuDialog } from "./_components/create-menu-dialog"
+import { MenusTable } from "../../../../components/rbac/menu/menus-table"
+import { CreateMenuDialog } from "../../../../components/rbac/menu/create-menu-dialog"
 
 export const metadata = {
   title: "Menus",
