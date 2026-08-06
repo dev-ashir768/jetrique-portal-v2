@@ -38,7 +38,7 @@ export function AuthGuard({ children }: { children: ReactNode }) {
   const router = useRouter()
   const pathname = usePathname()
 
-  const { isLoading: menusLoading, isSuccess: menusReady } = useMyMenus()
+  const { isSuccess: menusReady } = useMyMenus()
 
   const [hydrated, setHydrated] = useState(false)
 
@@ -73,7 +73,6 @@ export function AuthGuard({ children }: { children: ReactNode }) {
     if (!hydrated || !isAuthenticated || !menusReady) return
     const paths = getAllPaths(menus).map(normalizePath)
     const allowed = isRouteAllowed(pathname, menus)
-    // eslint-disable-next-line no-console
     console.debug("[AuthGuard] route check", { pathname, allowed, paths })
     if (menus.length > 0 && !allowed) {
       router.replace("/dashboard")
