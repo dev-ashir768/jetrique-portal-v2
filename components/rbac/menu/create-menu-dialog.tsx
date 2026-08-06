@@ -17,6 +17,7 @@ import {
 import { ReactSelectSingle } from "@/components/ui/react-select"
 import { useCreateMenu, useAllMenus } from "@/hooks/use-rbac"
 import { CreateMenuFormValues, createMenuSchema } from "@/lib/validations/rbac"
+import { Can } from "@/components/common"
 
 
 function toSlug(name: string) {
@@ -69,9 +70,11 @@ export function CreateMenuDialog() {
   return (
     <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) reset() }}>
       <DialogTrigger asChild>
-        <Button>
-          Create Menu
-        </Button>
+        <Can menu="menus" permission="create">
+          <Button>
+            Create Menu
+          </Button>
+        </Can>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
@@ -129,10 +132,10 @@ export function CreateMenuDialog() {
           </div>
 
           <div className="flex justify-center gap-4 pt-2">
-            <Button type="submit"  disabled={isPending}>
+            <Button type="submit" disabled={isPending}>
               {isPending ? "Creating..." : "Create"}
             </Button>
-            <Button type="button" variant="secondary"  onClick={() => { setOpen(false); reset() }}>
+            <Button type="button" variant="secondary" onClick={() => { setOpen(false); reset() }}>
               Cancel
             </Button>
           </div>
