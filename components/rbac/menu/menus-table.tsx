@@ -100,7 +100,6 @@ export function MenusTable() {
       exportFileName="menus"
       searchPlaceholder="Search menus..."
       onSearch={(search) => setParams((p) => ({ ...p, page: 1, search }))}
-      // onSort={(sortBy, sortOrder) => setParams((p) => ({ ...p, sortBy, sortOrder }))}
       onPaginationChange={(page, limit) => setParams((p) => ({ ...p, page, limit }))}
       onRefetch={refetch}
       filters={[
