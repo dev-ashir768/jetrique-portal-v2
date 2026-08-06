@@ -26,7 +26,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={cn("h-full", "antialiased", "font-sans", geistSans.variable, geistMono.variable, inter.variable, robotoHeading.variable)}
     >
       <body className="min-h-full flex flex-col">
-        <NextTopLoader color="hsl(var(--primary))" showSpinner={false} />
+        <NextTopLoader color="#ffffff" showSpinner={false} />
         <Providers>{children}</Providers>
       </body>
     </html>

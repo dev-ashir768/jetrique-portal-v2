@@ -1,10 +1,39 @@
 "use client"
 
+import { useState, useCallback, useEffect } from "react"
 import {
   flexRender,
   useTable,
-  createCoreRowModel,
 } from "@tanstack/react-table"
+import {
+  tableFeatures,
+  columnVisibilityFeature,
+  rowSortingFeature,
+  rowPaginationFeature,
+  createCoreRowModel,
+  createSortedRowModel,
+  createPaginatedRowModel,
+} from "@tanstack/table-core"
+import type {
+  ColumnDef,
+  ColumnVisibilityState,
+  SortingState,
+  RowData,
+} from "@tanstack/table-core"
+import {
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+  Download,
+  RefreshCw,
+  SlidersHorizontal,
+  Filter,
+  X,
+} from "lucide-react"
 import {
   Table,
   TableBody,
@@ -13,60 +42,570 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Label } from "@/components/ui/label"
+import { Badge } from "@/components/ui/badge"
+import { Skeleton } from "@/components/ui/skeleton"
 
-interface DataTableProps {
-  columns: any[]
-  data: any[]
-  emptyMessage?: string
+const features = tableFeatures({
+  columnVisibilityFeature,
+  rowSortingFeature,
+  rowPaginationFeature,
+  sortedRowModel: createSortedRowModel(),
+  paginatedRowModel: createPaginatedRowModel(),
+})
+
+export type { ColumnDef }
+
+export interface ServerPagination {
+  page: number
+  limit: number
+  total: number
+  pages: number
 }
 
-export function DataTable({
+export interface FilterField {
+  key: string
+  label: string
+  type: "text" | "select" | "date"
+  options?: { label: string; value: string }[]
+  placeholder?: string
+}
+
+export interface DataTableProps<TData extends RowData> {
+  columns: ColumnDef<typeof features, TData, any>[]
+  data: TData[]
+  pagination: ServerPagination
+  onPaginationChange: (page: number, limit: number) => void
+  onSearch?: (search: string) => void
+  onSort?: (sortBy: string, sortOrder: "asc" | "desc") => void
+  searchPlaceholder?: string
+  filters?: FilterField[]
+  activeFilters?: Record<string, string>
+  onFilterChange?: (filters: Record<string, string>) => void
+  exportFileName?: string
+  isLoading?: boolean
+  emptyMessage?: string
+  storageKey?: string
+}
+
+// ── Export Helpers ──
+
+function escapeCSV(value: unknown): string {
+  const str = String(value ?? "")
+  if (str.includes(",") || str.includes('"') || str.includes("\n")) {
+    return `"${str.replace(/"/g, '""')}"`
+  }
+  return str
+}
+
+function downloadFile(content: string, fileName: string, mimeType: string) {
+  const blob = new Blob([content], { type: mimeType })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement("a")
+  a.href = url
+  a.download = fileName
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  URL.revokeObjectURL(url)
+}
+
+function getExportColumns(columns: any[]) {
+  return columns.filter((col: any) => col.accessorKey && col.enableHiding !== false)
+}
+
+function exportToCSV(data: any[], columns: any[], fileName: string) {
+  const exportCols = getExportColumns(columns)
+  const headers = exportCols.map((col: any) => col.header?.toString() ?? col.accessorKey)
+  const rows = data.map((row) =>
+    exportCols.map((col: any) => escapeCSV(row[col.accessorKey as string]))
+  )
+  const csv = [headers.map(escapeCSV).join(","), ...rows.map((r) => r.join(","))].join("\n")
+  downloadFile(csv, `${fileName}.csv`, "text/csv;charset=utf-8;")
+}
+
+function exportToExcel(data: any[], columns: any[], fileName: string) {
+  const exportCols = getExportColumns(columns)
+  const headers = exportCols.map((col: any) => col.header?.toString() ?? col.accessorKey)
+  const rows = data.map((row) =>
+    exportCols.map((col: any) => `<td>${String(row[col.accessorKey as string] ?? "")}</td>`).join("")
+  )
+  const table = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel">
+<head><meta charset="UTF-8"></head>
+<body><table>
+<thead><tr>${headers.map((h) => `<th>${h}</th>`).join("")}</tr></thead>
+<tbody>${rows.map((r) => `<tr>${r}</tr>`).join("")}</tbody>
+</table></body></html>`
+  downloadFile(table, `${fileName}.xls`, "application/vnd.ms-excel")
+}
+
+// ── localStorage helpers for column visibility ──
+
+function loadVisibility(key?: string): ColumnVisibilityState {
+  if (!key) return {}
+  try {
+    const stored = localStorage.getItem(`dt-cols-${key}`)
+    return stored ? JSON.parse(stored) : {}
+  } catch {
+    return {}
+  }
+}
+
+function saveVisibility(key: string | undefined, state: ColumnVisibilityState) {
+  if (!key) return
+  try {
+    localStorage.setItem(`dt-cols-${key}`, JSON.stringify(state))
+  } catch { }
+}
+
+// ── Sort Header ──
+
+export function SortableHeader({
+  column,
+  title,
+  onSort,
+}: {
+  column: any
+  title: string
+  onSort?: (sortBy: string, sortOrder: "asc" | "desc") => void
+}) {
+  const sortDir = column.getIsSorted()
+
+  return (
+    <button
+      className="flex items-center gap-1 hover:text-foreground transition-colors -ml-2 px-2 py-1 rounded-md"
+      onClick={() => {
+        const accessorKey = column.columnDef.accessorKey as string
+        if (!accessorKey) return
+        if (sortDir === "asc") {
+          onSort?.(accessorKey, "desc")
+        } else {
+          onSort?.(accessorKey, "asc")
+        }
+      }}
+    >
+      {title}
+      {sortDir === "asc" ? (
+        <ArrowUp className="h-3.5 w-3.5" />
+      ) : sortDir === "desc" ? (
+        <ArrowDown className="h-3.5 w-3.5" />
+      ) : (
+        <ArrowUpDown className="h-3.5 w-3.5 text-muted-foreground/50" />
+      )}
+    </button>
+  )
+}
+
+// ── Filter Dialog ──
+
+function FilterDialog({
+  filters,
+  activeFilters,
+  onFilterChange,
+}: {
+  filters: FilterField[]
+  activeFilters: Record<string, string>
+  onFilterChange: (filters: Record<string, string>) => void
+}) {
+  const [localFilters, setLocalFilters] = useState<Record<string, string>>(activeFilters)
+  const [open, setOpen] = useState(false)
+
+  const activeCount = Object.values(activeFilters).filter(Boolean).length
+
+  const handleApply = () => {
+    onFilterChange(localFilters)
+    setOpen(false)
+  }
+
+  const handleClear = () => {
+    const cleared: Record<string, string> = {}
+    filters.forEach((f) => (cleared[f.key] = ""))
+    setLocalFilters(cleared)
+    onFilterChange(cleared)
+    setOpen(false)
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (o) setLocalFilters(activeFilters) }}>
+      <DialogTrigger asChild>
+        <Button variant="outline" size="sm" className="gap-1.5">
+          <Filter className="h-4 w-4" />
+          Filters
+          {activeCount > 0 && (
+            <Badge variant="secondary" className="h-5 min-w-5 px-1 text-[10px]">
+              {activeCount}
+            </Badge>
+          )}
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Filters</DialogTitle>
+        </DialogHeader>
+        <div className="flex flex-col gap-4 py-2">
+          {filters.map((filter) => (
+            <div key={filter.key} className="flex flex-col gap-1.5">
+              <Label className="text-xs">{filter.label}</Label>
+              {filter.type === "select" ? (
+                <Select
+                  value={localFilters[filter.key] || ""}
+                  onValueChange={(v) => setLocalFilters((p) => ({ ...p, [filter.key]: v }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={filter.placeholder || `Select ${filter.label}`} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {filter.options?.map((opt) => (
+                      <SelectItem key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <Input
+                  placeholder={filter.placeholder || `Enter ${filter.label}`}
+                  value={localFilters[filter.key] || ""}
+                  onChange={(e) => setLocalFilters((p) => ({ ...p, [filter.key]: e.target.value }))}
+                />
+              )}
+            </div>
+          ))}
+        </div>
+        <div className="flex justify-between pt-2">
+          <Button variant="ghost" size="sm" onClick={handleClear}>
+            Clear all
+          </Button>
+          <Button size="sm" onClick={handleApply}>
+            Apply filters
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+// ── Active Filter Badges ──
+
+function ActiveFilterBadges({
+  filters,
+  activeFilters,
+  onRemove,
+}: {
+  filters: FilterField[]
+  activeFilters: Record<string, string>
+  onRemove: (key: string) => void
+}) {
+  const active = Object.entries(activeFilters).filter(([, v]) => Boolean(v))
+  if (active.length === 0) return null
+
+  return (
+    <div className="flex flex-wrap gap-1.5">
+      {active.map(([key, value]) => {
+        const field = filters.find((f) => f.key === key)
+        const displayValue = field?.type === "select"
+          ? field.options?.find((o) => o.value === value)?.label ?? value
+          : value
+
+        return (
+          <Badge key={key} variant="secondary" className="gap-1 pr-1">
+            <span className="text-muted-foreground">{field?.label}:</span> {displayValue}
+            <button onClick={() => onRemove(key)} className="ml-0.5 rounded-sm hover:bg-accent p-0.5">
+              <X className="h-3 w-3" />
+            </button>
+          </Badge>
+        )
+      })}
+    </div>
+  )
+}
+
+// ── Main DataTable ──
+
+export function DataTable<TData extends RowData>({
   columns,
   data,
+  pagination,
+  onPaginationChange,
+  onSearch,
+  onSort,
+  searchPlaceholder = "Search...",
+  filters,
+  activeFilters = {},
+  onFilterChange,
+  exportFileName = "export",
+  isLoading = false,
   emptyMessage = "No results found.",
-}: DataTableProps) {
+  storageKey,
+}: DataTableProps<TData>) {
+  const [columnVisibility, setColumnVisibility] = useState<ColumnVisibilityState>(() =>
+    loadVisibility(storageKey)
+  )
+  const [sorting, setSorting] = useState<SortingState>([])
+  const [searchValue, setSearchValue] = useState("")
+
+  useEffect(() => {
+    saveVisibility(storageKey, columnVisibility)
+  }, [storageKey, columnVisibility])
+
   const table = useTable({
     data,
     columns,
-    features: [createCoreRowModel()],
-  } as any)
+    features,
+    state: {
+      columnVisibility,
+      sorting,
+    },
+    onColumnVisibilityChange: setColumnVisibility,
+    onSortingChange: (updater) => {
+      const next = typeof updater === "function" ? updater(sorting) : updater
+      setSorting(next)
+      if (next.length > 0) {
+        onSort?.(next[0].id, next[0].desc ? "desc" : "asc")
+      }
+    },
+    manualPagination: true,
+    manualSorting: true,
+    rowCount: pagination.total,
+  })
+
+  const handleSearch = useCallback(
+    (value: string) => {
+      setSearchValue(value)
+      onSearch?.(value)
+    },
+    [onSearch]
+  )
+
+  const handleFilterRemove = useCallback(
+    (key: string) => {
+      onFilterChange?.({ ...activeFilters, [key]: "" })
+    },
+    [activeFilters, onFilterChange]
+  )
+
+  const startRow = (pagination.page - 1) * pagination.limit + 1
+  const endRow = Math.min(pagination.page * pagination.limit, pagination.total)
 
   return (
-    <div className="rounded-md border">
-      <Table>
-        <TableHeader>
-          {table.getHeaderGroups().map((headerGroup: any) => (
-            <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header: any) => (
-                <TableHead key={header.id}>
-                  {header.isPlaceholder
-                    ? null
-                    : flexRender(header.column.columnDef.header, header.getContext())}
-                </TableHead>
-              ))}
-            </TableRow>
-          ))}
-        </TableHeader>
-        <TableBody>
-          {table.getRowModel().rows.length ? (
-            table.getRowModel().rows.map((row: any) => (
-              <TableRow key={row.id}>
-                {row.getVisibleCells().map((cell: any) => (
-                  <TableCell key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
+    <div className="flex flex-col gap-3">
+      {/* Toolbar */}
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center gap-2">
+          {onSearch && (
+            <Input
+              placeholder={searchPlaceholder}
+              value={searchValue}
+              onChange={(e) => handleSearch(e.target.value)}
+              className="max-w-xs"
+            />
+          )}
+
+          <div className="ml-auto flex items-center gap-2">
+            {filters && filters.length > 0 && onFilterChange && (
+              <FilterDialog
+                filters={filters}
+                activeFilters={activeFilters}
+                onFilterChange={onFilterChange}
+              />
+            )}
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="gap-1.5">
+                  <SlidersHorizontal className="h-4 w-4" />
+                  Columns
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-44">
+                <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {table.getAllColumns()
+                  .filter((col) => col.getCanHide())
+                  .map((col) => (
+                    <DropdownMenuCheckboxItem
+                      key={col.id}
+                      checked={col.getIsVisible()}
+                      onCheckedChange={(v) => col.toggleVisibility(!!v)}
+                      className="capitalize"
+                    >
+                      {typeof col.columnDef.header === "string" ? col.columnDef.header : col.id}
+                    </DropdownMenuCheckboxItem>
+                  ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="gap-1.5">
+                  <Download className="h-4 w-4" />
+                  Export
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => exportToCSV(data, columns as any[], exportFileName)}>
+                  Export as CSV
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => exportToExcel(data, columns as any[], exportFileName)}>
+                  Export as Excel
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </div>
+
+        {filters && (
+          <ActiveFilterBadges
+            filters={filters}
+            activeFilters={activeFilters}
+            onRemove={handleFilterRemove}
+          />
+        )}
+      </div>
+
+      {/* Table */}
+      <div className="rounded-md border bg-card">
+        <Table>
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => (
+                  <TableHead key={header.id}>
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(header.column.columnDef.header, header.getContext())}
+                  </TableHead>
                 ))}
               </TableRow>
-            ))
-          ) : (
-            <TableRow>
-              <TableCell colSpan={columns.length} className="h-24 text-center text-muted-foreground">
-                {emptyMessage}
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {isLoading ? (
+              Array.from({ length: pagination.limit }).map((_, i) => (
+                <TableRow key={`skeleton-${i}`}>
+                  {columns.map((_, j) => (
+                    <TableCell key={`skeleton-${i}-${j}`}>
+                      <Skeleton className="h-5 w-full" />
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : table.getRowModel().rows.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow key={row.id}>
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}>
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={columns.length} className="h-24 text-center text-muted-foreground">
+                  {emptyMessage}
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
+
+      {/* Pagination */}
+      <div className="flex items-center justify-between">
+        <p className="text-sm text-muted-foreground">
+          {pagination.total > 0
+            ? `Showing ${startRow}–${endRow} of ${pagination.total}`
+            : "No results"}
+        </p>
+
+        <div className="flex items-center gap-2">
+          <Select
+            value={String(pagination.limit)}
+            onValueChange={(v) => onPaginationChange(1, Number(v))}
+          >
+            <SelectTrigger className="w-17.5 h-10">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {[10, 20, 30, 50, 100].map((size) => (
+                <SelectItem key={size} value={String(size)}>
+                  {size}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <div className="flex items-center gap-1">
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-10 w-10"
+              onClick={() => onPaginationChange(1, pagination.limit)}
+              disabled={pagination.page <= 1}
+            >
+              <ChevronsLeft className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-10 w-10"
+              onClick={() => onPaginationChange(pagination.page - 1, pagination.limit)}
+              disabled={pagination.page <= 1}
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+
+            <span className="px-2 text-sm text-muted-foreground">
+              {pagination.page} / {pagination.pages || 1}
+            </span>
+
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-10 w-10"
+              onClick={() => onPaginationChange(pagination.page + 1, pagination.limit)}
+              disabled={pagination.page >= pagination.pages}
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-10 w-10"
+              onClick={() => onPaginationChange(pagination.pages, pagination.limit)}
+              disabled={pagination.page >= pagination.pages}
+            >
+              <ChevronsRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }

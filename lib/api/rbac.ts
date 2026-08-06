@@ -1,18 +1,7 @@
 import { apiClient } from "./client"
+import type { ApiResponse, MenuItem } from "@/types"
 
 export const rbacApi = {
-  getMenus: () =>
-    apiClient.get("/rbac/menus"),
-
-  getPermissions: () =>
-    apiClient.get("/rbac/permissions"),
-
-  getRoles: () =>
-    apiClient.get("/rbac/roles"),
-
-  getMyRBAC: () =>
-    apiClient.get("/rbac/my"),
-
   getMyMenus: () =>
-    apiClient.get("/rbac/my/menus"),
+    apiClient.get<ApiResponse<MenuItem[]>>("/rbac/me/menus"),
 }

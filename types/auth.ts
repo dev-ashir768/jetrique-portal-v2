@@ -30,11 +30,12 @@ export interface AuthOrganization {
 }
 
 export interface SignupPayload {
-  email: string
-  password: string
   firstName: string
   lastName: string
+  email: string
   phone: string
+  password: string
+  confirmPassword: string
   role: "OPERATOR" | "AGENT"
   organizationName?: string
 }
@@ -46,11 +47,5 @@ export interface ForgotPasswordPayload {
 export interface ResetPasswordPayload {
   token: string
   password: string
-  confirmPassword: string
-}
-
-export interface ChangePasswordPayload {
-  currentPassword: string
-  newPassword: string
   confirmPassword: string
 }

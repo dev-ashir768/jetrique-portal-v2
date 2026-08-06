@@ -5,6 +5,8 @@ import type {
   SignupPayload,
   ForgotPasswordPayload,
   ResetPasswordPayload,
+  ApiResponse,
+  AuthUser,
 } from "@/types"
 
 export const authApi = {
@@ -12,20 +14,14 @@ export const authApi = {
     apiClient.post<LoginResponse>("/auth/login", payload),
 
   signup: (payload: SignupPayload) =>
-    apiClient.post("/auth/register", payload),
-
-  forgotPassword: (payload: ForgotPasswordPayload) =>
-    apiClient.post("/auth/forgot-password", payload),
-
-  resetPassword: (payload: ResetPasswordPayload) =>
-    apiClient.post("/auth/reset-password", payload),
-
-  verifyEmail: (token: string) =>
-    apiClient.post("/auth/verify-email", { token }),
+    apiClient.post<ApiResponse<{ message: string }>>("/auth/signup", payload),
 
   me: () =>
-    apiClient.get("/auth/me"),
+    apiClient.get<ApiResponse<AuthUser>>("/auth/me"),
 
-  logout: () =>
-    apiClient.post("/auth/logout"),
+  forgotPassword: (payload: ForgotPasswordPayload) =>
+    apiClient.post<ApiResponse<{ message: string }>>("/auth/forgot-password", payload),
+
+  resetPassword: (payload: ResetPasswordPayload) =>
+    apiClient.post<ApiResponse<{ message: string }>>("/auth/reset-password", payload),
 }

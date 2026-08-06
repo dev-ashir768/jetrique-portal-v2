@@ -1,62 +1,147 @@
 "use client"
 
+import { useState } from "react"
 import { usePathname } from "next/navigation"
 import Link from "next/link"
+import { ChevronRight } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Sheet, SheetContent } from "@/components/ui/sheet"
-import { useSidebarStore } from "@/stores"
-import { useAuthStore } from "@/stores"
-import { DASHBOARD_NAV, ADMIN_NAV } from "@/config/navigation"
-import type { NavItem } from "@/config/navigation"
+import { Skeleton } from "@/components/ui/skeleton"
+import { useSidebarStore, useRBACStore } from "@/stores"
+import { useMyMenus } from "@/hooks/use-rbac"
+import { getIcon } from "@/lib/icon-map"
+import type { MenuItem } from "@/types"
 
-function NavLink({ item, isCollapsed }: { item: NavItem; isCollapsed: boolean }) {
+function NavLink({
+  item,
+  isCollapsed,
+  indent = false,
+}: {
+  item: MenuItem
+  isCollapsed: boolean
+  indent?: boolean
+}) {
   const pathname = usePathname()
-  const isActive = pathname === item.href
+  const href = item.path
+  if (!href) return null
+
+  const isActive = pathname === href || pathname.startsWith(href + "/")
+  const Icon = getIcon(item.icon)
 
   return (
     <Link
-      href={item.href}
+      href={href}
       className={cn(
         "flex h-10 items-center gap-1.5 rounded-md px-2.5 text-sm font-medium transition-colors",
         isActive
           ? "bg-sidebar-accent text-sidebar-accent-foreground"
           : "text-muted-foreground hover:bg-sidebar-accent/50 hover:text-foreground",
         isCollapsed && "justify-center px-2",
+        indent && !isCollapsed && "pl-9",
       )}
     >
-      <item.icon className="h-4.5 w-4.5 shrink-0" />
-      {!isCollapsed && <span>{item.title}</span>}
+      <Icon className="h-4.5 w-4.5 shrink-0" />
+      {!isCollapsed && <span>{item.name}</span>}
     </Link>
   )
 }
 
+function NavDropdown({
+  item,
+  isCollapsed,
+}: {
+  item: MenuItem
+  isCollapsed: boolean
+}) {
+  const pathname = usePathname()
+  const isChildActive = item.children.some(
+    (child) =>
+      child.path &&
+      (pathname === child.path || pathname.startsWith(child.path + "/")),
+  )
+  const [open, setOpen] = useState(isChildActive)
+  const Icon = getIcon(item.icon)
+
+  return (
+    <div>
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className={cn(
+          "flex h-10 w-full items-center gap-1.5 rounded-md px-2.5 text-sm font-medium transition-colors",
+          isChildActive
+            ? "text-sidebar-accent-foreground"
+            : "text-muted-foreground hover:bg-sidebar-accent/50 hover:text-foreground",
+          isCollapsed && "justify-center px-2",
+        )}
+      >
+        <Icon className="h-4.5 w-4.5 shrink-0" />
+        {!isCollapsed && (
+          <>
+            <span className="flex-1 text-left">{item.name}</span>
+            <ChevronRight
+              className={cn(
+                "h-3.5 w-3.5 shrink-0 transition-transform duration-200",
+                open && "rotate-90",
+              )}
+            />
+          </>
+        )}
+      </button>
+      {open && !isCollapsed && (
+        <div className="flex flex-col gap-0.5">
+          {item.children.map((child) => (
+            <NavLink key={child.id} item={child} isCollapsed={false} indent />
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function NavItem({
+  item,
+  isCollapsed,
+}: {
+  item: MenuItem
+  isCollapsed: boolean
+}) {
+  if (item.children.length > 0) {
+    return <NavDropdown item={item} isCollapsed={isCollapsed} />
+  }
+  return <NavLink item={item} isCollapsed={isCollapsed} />
+}
+
+function SidebarSkeleton() {
+  return (
+    <div className="flex flex-col gap-1.5 px-2 py-3">
+      {Array.from({ length: 6 }).map((_, i) => (
+        <Skeleton key={i} className="h-10 w-full rounded-md" />
+      ))}
+    </div>
+  )
+}
+
 function SidebarContent({ isCollapsed }: { isCollapsed: boolean }) {
-  const { user } = useAuthStore()
-  const isSuperAdmin = user?.role === "Super Admin"
+  const { isLoading } = useMyMenus()
+  const { menus } = useRBACStore()
 
   return (
     <div className="flex h-full flex-col overflow-hidden rounded-tl-xl bg-sidebar">
       <ScrollArea className="flex-1 px-2 py-3">
-        <nav className="flex flex-col gap-0.5">
-          {DASHBOARD_NAV.map((item) => (
-            <NavLink key={item.href} item={item} isCollapsed={isCollapsed} />
-          ))}
-
-          {isSuperAdmin && (
-            <>
-              <div className={cn("my-3 border-t", isCollapsed && "mx-2")} />
-              {!isCollapsed && (
-                <span className="px-3 pb-1 text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">
-                  Admin
-                </span>
-              )}
-              {ADMIN_NAV.map((item) => (
-                <NavLink key={item.href} item={item} isCollapsed={isCollapsed} />
-              ))}
-            </>
-          )}
-        </nav>
+        {isLoading ? (
+          <SidebarSkeleton />
+        ) : (
+          <nav className="flex flex-col gap-0.5">
+            {menus.map((item) => (
+              <NavItem
+                key={item.id}
+                item={item}
+                isCollapsed={isCollapsed}
+              />
+            ))}
+          </nav>
+        )}
       </ScrollArea>
     </div>
   )
@@ -70,7 +155,7 @@ export function Sidebar() {
       <aside
         className={cn(
           "hidden flex-col rounded-tl-xl transition-all duration-300 md:flex",
-          isCollapsed ? "w-16" : "w-55",
+          isCollapsed ? "w-16" : "w-56",
         )}
       >
         <SidebarContent isCollapsed={isCollapsed} />
