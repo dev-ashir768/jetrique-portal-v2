@@ -41,7 +41,7 @@ function NavLink({
         indent && !isCollapsed && "pl-5 ml-1",
       )}
     >
-      {!indent && !isCollapsed && createElement(icon, { className: "h-4.5 w-4.5 shrink-0" })}
+      {!indent && createElement(icon, { className: "h-4.5 w-4.5 shrink-0" })}
       {!isCollapsed && <span>{item.name}</span>}
     </Link>
   )

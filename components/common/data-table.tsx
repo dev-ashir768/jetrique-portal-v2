@@ -569,7 +569,7 @@ export function DataTable<TData extends RowData>({
       <div className="flex items-center gap-2 p-2.5 justify-between">
         <p className="text-sm text-muted-foreground">
           {pagination.total > 0
-            ? `Showing ${startRow}–${endRow} of ${pagination.total}`
+            ? `Showing ${startRow} – ${endRow} of ${pagination.total}`
             : "No results"}
         </p>
 
