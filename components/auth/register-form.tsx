@@ -339,8 +339,8 @@ export function RegisterForm() {
                     render={({ field }) => (
                       <ReactSelectSingle<SelectOption>
                         placeholder={countriesLoading ? "Loading…" : "Select country"}
-                        options={countries.map((c) => ({ label: c.name, value: c.id }))}
-                        value={countries.map((c) => ({ label: c.name, value: c.id })).find((o) => o.value === field.value) ?? null}
+                        options={countries.map((c: Location) => ({ label: c.name, value: c.id }))}
+                        value={countries.map((c: Location) => ({ label: c.name, value: c.id })).find((o: SelectOption) => o.value === field.value) ?? null}
                         onChange={(opt) => { const v = opt?.value ?? ""; field.onChange(v); onCountryChange(v) }}
                         isLoading={countriesLoading}
                         isClearable
@@ -358,8 +358,8 @@ export function RegisterForm() {
                     render={({ field }) => (
                       <ReactSelectSingle<SelectOption>
                         placeholder={!selectedCountryId ? "Select country first" : provincesLoading ? "Loading…" : "Select province"}
-                        options={provinces.map((p) => ({ label: p.name, value: p.id }))}
-                        value={provinces.map((p) => ({ label: p.name, value: p.id })).find((o) => o.value === field.value) ?? null}
+                        options={provinces.map((p: Location) => ({ label: p.name, value: p.id }))}
+                        value={provinces.map((p: Location) => ({ label: p.name, value: p.id })).find((o: SelectOption) => o.value === field.value) ?? null}
                         onChange={(opt) => { const v = opt?.value ?? ""; field.onChange(v); onProvinceChange(v) }}
                         isDisabled={!selectedCountryId}
                         isLoading={provincesLoading}
@@ -378,8 +378,8 @@ export function RegisterForm() {
                     render={({ field }) => (
                       <ReactSelectSingle<SelectOption>
                         placeholder={!selectedProvinceId ? "Select province first" : citiesLoading ? "Loading…" : "Select city"}
-                        options={cities.map((c) => ({ label: c.name, value: c.id }))}
-                        value={cities.map((c) => ({ label: c.name, value: c.id })).find((o) => o.value === field.value) ?? null}
+                        options={cities.map((c: Location) => ({ label: c.name, value: c.id }))}
+                        value={cities.map((c: Location) => ({ label: c.name, value: c.id })).find((o: SelectOption) => o.value === field.value) ?? null}
                         onChange={(opt) => field.onChange(opt?.value ?? "")}
                         isDisabled={!selectedProvinceId}
                         isLoading={citiesLoading}
