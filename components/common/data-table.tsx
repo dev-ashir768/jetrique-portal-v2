@@ -30,8 +30,8 @@ import {
   ChevronsRight,
   Download,
   RefreshCw,
-  SlidersHorizontal,
-  Filter,
+  Columns3,
+  ListFilter,
   X,
 } from "lucide-react"
 import {
@@ -70,8 +70,10 @@ import {
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import { cn } from "@/lib/utils"
 
-const features = tableFeatures({
+export const features = tableFeatures({
   columnVisibilityFeature,
   rowSortingFeature,
   rowPaginationFeature,
@@ -107,6 +109,7 @@ export interface DataTableProps<TData extends RowData> {
   filters?: FilterField[]
   activeFilters?: Record<string, string>
   onFilterChange?: (filters: Record<string, string>) => void
+  onRefetch?: () => void
   exportFileName?: string
   isLoading?: boolean
   emptyMessage?: string
@@ -253,15 +256,19 @@ function FilterDialog({
   return (
     <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (o) setLocalFilters(activeFilters) }}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="gap-1.5">
-          <Filter className="h-4 w-4" />
-          Filters
-          {activeCount > 0 && (
-            <Badge variant="secondary" className="h-5 min-w-5 px-1 text-[10px]">
-              {activeCount}
-            </Badge>
-          )}
-        </Button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="outline" size="icon" className="relative h-9 w-9">
+              <ListFilter className="h-4 w-4" />
+              {activeCount > 0 && (
+                <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] text-primary-foreground">
+                  {activeCount}
+                </span>
+              )}
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Filters</TooltipContent>
+        </Tooltip>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
@@ -358,6 +365,7 @@ export function DataTable<TData extends RowData>({
   filters,
   activeFilters = {},
   onFilterChange,
+  onRefetch,
   exportFileName = "export",
   isLoading = false,
   emptyMessage = "No results found.",
@@ -413,9 +421,9 @@ export function DataTable<TData extends RowData>({
   const endRow = Math.min(pagination.page * pagination.limit, pagination.total)
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-0 rounded-md bg-white overflow-hidden">
       {/* Toolbar */}
-      <div className="flex flex-col gap-2">
+      <div className="flex items-center gap-2 p-2.5 flex-wrap">
         <div className="flex items-center gap-2">
           {onSearch && (
             <Input
@@ -426,7 +434,18 @@ export function DataTable<TData extends RowData>({
             />
           )}
 
-          <div className="ml-auto flex items-center gap-2">
+          <div className="ml-auto flex items-center gap-1.5">
+            {onRefetch && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="outline" size="icon" className="h-9 w-9" onClick={onRefetch}>
+                    <RefreshCw className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Refresh</TooltipContent>
+              </Tooltip>
+            )}
+
             {filters && filters.length > 0 && onFilterChange && (
               <FilterDialog
                 filters={filters}
@@ -437,10 +456,14 @@ export function DataTable<TData extends RowData>({
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="gap-1.5">
-                  <SlidersHorizontal className="h-4 w-4" />
-                  Columns
-                </Button>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant="outline" size="icon" className="h-9 w-9">
+                      <Columns3 className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Columns</TooltipContent>
+                </Tooltip>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-44">
                 <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
@@ -462,10 +485,14 @@ export function DataTable<TData extends RowData>({
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="gap-1.5">
-                  <Download className="h-4 w-4" />
-                  Export
-                </Button>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant="outline" size="icon" className="h-9 w-9">
+                      <Download className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Export</TooltipContent>
+                </Tooltip>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={() => exportToCSV(data, columns as any[], exportFileName)}>
@@ -489,13 +516,23 @@ export function DataTable<TData extends RowData>({
       </div>
 
       {/* Table */}
-      <div className="rounded-md border bg-card">
+      <div className="overflow-x-auto">
         <Table>
-          <TableHeader>
+          <TableHeader className="bg-gray-400/60">
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
+              <TableRow key={headerGroup.id} className="bg-gray-50/80 hover:bg-gray-50/80 border-none">
                 {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
+                  <TableHead
+                    key={header.id}
+                    className={cn(
+                      "text-xs font-semibold uppercase tracking-wide text-gray-500 px-3 h-9",
+                      header.column.getCanSort() && "cursor-pointer select-none",
+                    )}
+                    style={{ width: (header.column.columnDef as any).size }}
+                    onClick={header.column.getCanSort()
+                      ? () => header.column.toggleSorting(header.column.getIsSorted() === "asc")
+                      : undefined}
+                  >
                     {header.isPlaceholder
                       ? null
                       : flexRender(header.column.columnDef.header, header.getContext())}
@@ -504,40 +541,43 @@ export function DataTable<TData extends RowData>({
               </TableRow>
             ))}
           </TableHeader>
-          <TableBody>
+          <TableBody className="[&_tr:last-child]:border-b">
             {isLoading ? (
               Array.from({ length: pagination.limit }).map((_, i) => (
-                <TableRow key={`skeleton-${i}`}>
-                  {columns.map((_, j) => (
-                    <TableCell key={`skeleton-${i}-${j}`}>
-                      <Skeleton className="h-5 w-full" />
+                <TableRow key={i} className="hover:bg-transparent">
+                  {columns.map((_, ci) => (
+                    <TableCell key={ci} className="px-3 py-2">
+                      <Skeleton className="h-4 w-full rounded" />
                     </TableCell>
                   ))}
                 </TableRow>
               ))
-            ) : table.getRowModel().rows.length ? (
+            ) : table.getRowModel().rows.length === 0 ? (
+              <TableRow className="hover:bg-transparent">
+                <TableCell colSpan={columns.length} className="py-16 text-center text-sm text-muted-foreground">
+                  {emptyMessage}
+                </TableCell>
+              </TableRow>
+            ) : (
               table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id}>
+                <TableRow
+                  key={row.id}
+                  className="transition-colors border-b border-gray-50 hover:bg-gray-50/80"
+                >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
+                    <TableCell key={cell.id} className="px-3 py-2 text-sm text-gray-700">
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>
                   ))}
                 </TableRow>
               ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center text-muted-foreground">
-                  {emptyMessage}
-                </TableCell>
-              </TableRow>
             )}
           </TableBody>
         </Table>
       </div>
 
       {/* Pagination */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center gap-2 p-2.5 justify-between">
         <p className="text-sm text-muted-foreground">
           {pagination.total > 0
             ? `Showing ${startRow}–${endRow} of ${pagination.total}`

@@ -55,7 +55,7 @@ function NavDropdown({
   isCollapsed: boolean
 }) {
   const pathname = usePathname()
-  const isChildActive = item.children.some(
+  const isChildActive = (item.children ?? []).some(
     (child) =>
       child.path &&
       (pathname === child.path || pathname.startsWith(child.path + "/")),
@@ -90,7 +90,7 @@ function NavDropdown({
       </button>
       {open && !isCollapsed && (
         <div className="ml-4.5 border-l border-border pl-0 flex flex-col gap-0.5">
-          {item.children.map((child) => (
+          {(item.children ?? []).map((child) => (
             <NavLink key={child.id} item={child} isCollapsed={false} indent />
           ))}
         </div>
@@ -106,7 +106,7 @@ function NavItem({
   item: MenuItem
   isCollapsed: boolean
 }) {
-  if (item.children.length > 0) {
+  if ((item.children ?? []).length > 0) {
     return <NavDropdown item={item} isCollapsed={isCollapsed} />
   }
   return <NavLink item={item} isCollapsed={isCollapsed} />

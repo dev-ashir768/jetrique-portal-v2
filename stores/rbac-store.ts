@@ -1,6 +1,7 @@
 "use client"
 
 import { create } from "zustand"
+import { persist } from "zustand/middleware"
 import type { MenuItem } from "@/types"
 
 interface RBACState {
@@ -10,19 +11,24 @@ interface RBACState {
   clear: () => void
 }
 
-export const useRBACStore = create<RBACState>()((set, get) => ({
-  menus: [],
-  setMenus: (menus) => set({ menus }),
-  hasPermission: (menuSlug, permissionSlug) => {
-    const { menus } = get()
-    const find = (items: MenuItem[]): boolean =>
-      items.some(
-        (item) =>
-          (item.slug === menuSlug &&
-            item.permissions.some((p) => p.slug === permissionSlug)) ||
-          find(item.children),
-      )
-    return find(menus)
-  },
-  clear: () => set({ menus: [] }),
-}))
+export const useRBACStore = create<RBACState>()(
+  persist(
+    (set, get) => ({
+      menus: [],
+      setMenus: (menus) => set({ menus }),
+      hasPermission: (menuSlug, permissionSlug) => {
+        const { menus } = get()
+        const find = (items: MenuItem[]): boolean =>
+          items.some(
+            (item) =>
+              (item.slug === menuSlug &&
+                (item.permissions ?? []).some((p) => p.slug === permissionSlug)) ||
+              find(item.children ?? []),
+          )
+        return find(menus)
+      },
+      clear: () => set({ menus: [] }),
+    }),
+    { name: "jetrique-rbac" },
+  ),
+)

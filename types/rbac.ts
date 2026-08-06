@@ -14,8 +14,25 @@ export interface MenuItem {
   icon: string
   order: number
   parentId: UUID | null
-  permissions: Permission[]
+  isActive: boolean
+  createdAt: string
+  updatedAt: string
+  permissions?: Permission[]
   children: MenuItem[]
+}
+
+export interface MenusParams {
+  page?: number
+  limit?: number
+  search?: string
+  isActive?: boolean
+  sortBy?: string
+  sortOrder?: "asc" | "desc"
+}
+
+export interface MenusResponse {
+  items: MenuItem[]
+  meta: { total: number }
 }
 
 export interface Role {

@@ -4,6 +4,7 @@ import { create } from "zustand"
 import { persist } from "zustand/middleware"
 import type { AuthUser } from "@/types"
 import { TOKEN_KEY } from "@/lib/constants"
+import { useRBACStore } from "./rbac-store"
 
 interface AuthState {
   user: AuthUser | null
@@ -25,6 +26,7 @@ export const useAuthStore = create<AuthState>()(
       },
       logout: () => {
         localStorage.removeItem(TOKEN_KEY)
+        useRBACStore.getState().clear()
         set({ user: null, isAuthenticated: false })
       },
     }),
