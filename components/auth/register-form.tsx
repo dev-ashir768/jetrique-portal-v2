@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { toast } from "sonner"
 import { isValidPhoneNumber } from "libphonenumber-js"
-import { Plane, Briefcase, MapPin, Globe, Building2, User, Eye, EyeOff, Upload, X, CheckCircle2 } from "lucide-react"
+import { Plane, Briefcase, MapPin, Globe, Building2, Eye, EyeOff, Upload, X, CheckCircle2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -270,7 +270,6 @@ export function RegisterForm() {
                   { value: "TOUR_OPERATOR" as AgentCategory, Icon: MapPin },
                   { value: "TRAVEL_AGENT" as AgentCategory, Icon: Globe },
                   { value: "HOTEL_PARTNER" as AgentCategory, Icon: Building2 },
-                  { value: "GENERAL_AGENT" as AgentCategory, Icon: User },
                 ] as const).map(({ value, Icon }) => {
                   const cat = AGENT_CATEGORIES.find((c) => c.value === value)!
                   return (
@@ -304,6 +303,31 @@ export function RegisterForm() {
       {/* Steps 1–3 */}
       {step >= 1 && step <= 3 && (
         <div className="flex flex-col gap-5">
+          {/* Selection summary */}
+          <div className="flex items-center gap-2 rounded-md border border-border bg-muted/40 px-3 py-2">
+            {orgType === "OPERATOR"
+              ? <Plane className="h-4 w-4 shrink-0 text-primary" />
+              : <Briefcase className="h-4 w-4 shrink-0 text-primary" />}
+            <span className="text-sm font-medium text-foreground">
+              {orgType === "OPERATOR" ? "Operator" : "Agent"}
+            </span>
+            {orgType === "AGENT" && agentCategory && (
+              <>
+                <span className="text-muted-foreground">/</span>
+                <span className="text-sm text-muted-foreground">
+                  {AGENT_CATEGORIES.find((c) => c.value === agentCategory)?.label}
+                </span>
+              </>
+            )}
+            <button
+              type="button"
+              onClick={() => setStep(0)}
+              className="ml-auto text-xs text-primary underline-offset-2 hover:underline"
+            >
+              Change
+            </button>
+          </div>
+
           {/* Progress */}
           <div className="flex items-center gap-2">
             {[1, 2, 3].map((s) => (
