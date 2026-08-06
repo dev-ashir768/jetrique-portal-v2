@@ -192,11 +192,9 @@ function saveVisibility(key: string | undefined, state: ColumnVisibilityState) {
 export function SortableHeader({
   column,
   title,
-  onSort,
 }: {
   column: any
   title: string
-  onSort?: (sortBy: string, sortOrder: "asc" | "desc") => void
 }) {
   const sortDir = column.getIsSorted()
 
