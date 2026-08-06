@@ -206,11 +206,7 @@ export function SortableHeader({
       onClick={() => {
         const accessorKey = column.columnDef.accessorKey as string
         if (!accessorKey) return
-        if (sortDir === "asc") {
-          onSort?.(accessorKey, "desc")
-        } else {
-          onSort?.(accessorKey, "asc")
-        }
+        column.toggleSorting(sortDir === "asc")
       }}
     >
       {title}
@@ -393,7 +389,7 @@ export function DataTable<TData extends RowData>({
       }
     },
     manualPagination: true,
-    manualSorting: true,
+    manualSorting: !!onSort,
     rowCount: pagination.total,
   })
 
