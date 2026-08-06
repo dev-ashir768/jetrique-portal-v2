@@ -592,7 +592,7 @@ export function DataTable<TData extends RowData>({
             <SelectTrigger className="w-17.5 h-10">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent position="popper" align="start">
               {[10, 20, 30, 50, 100].map((size) => (
                 <SelectItem key={size} value={String(size)}>
                   {size}
@@ -602,47 +602,67 @@ export function DataTable<TData extends RowData>({
           </Select>
 
           <div className="flex items-center gap-1">
-            <Button
-              variant="outline"
-              size="icon"
-              className="h-10 w-10"
-              onClick={() => onPaginationChange(1, pagination.limit)}
-              disabled={pagination.page <= 1}
-            >
-              <ChevronsLeft className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              className="h-10 w-10"
-              onClick={() => onPaginationChange(pagination.page - 1, pagination.limit)}
-              disabled={pagination.page <= 1}
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-10 w-10"
+                  onClick={() => onPaginationChange(1, pagination.limit)}
+                  disabled={pagination.page <= 1}
+                >
+                  <ChevronsLeft className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>First page</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-10 w-10"
+                  onClick={() => onPaginationChange(pagination.page - 1, pagination.limit)}
+                  disabled={pagination.page <= 1}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Previous page</TooltipContent>
+            </Tooltip>
 
             <span className="px-2 text-sm text-muted-foreground">
               {pagination.page} / {pagination.pages || 1}
             </span>
 
-            <Button
-              variant="outline"
-              size="icon"
-              className="h-10 w-10"
-              onClick={() => onPaginationChange(pagination.page + 1, pagination.limit)}
-              disabled={pagination.page >= pagination.pages}
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              className="h-10 w-10"
-              onClick={() => onPaginationChange(pagination.pages, pagination.limit)}
-              disabled={pagination.page >= pagination.pages}
-            >
-              <ChevronsRight className="h-4 w-4" />
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-10 w-10"
+                  onClick={() => onPaginationChange(pagination.page + 1, pagination.limit)}
+                  disabled={pagination.page >= pagination.pages}
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Next page</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-10 w-10"
+                  onClick={() => onPaginationChange(pagination.pages, pagination.limit)}
+                  disabled={pagination.page >= pagination.pages}
+                >
+                  <ChevronsRight className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Last page</TooltipContent>
+            </Tooltip>
           </div>
         </div>
       </div>

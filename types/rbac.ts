@@ -17,6 +17,7 @@ export interface MenuItem {
   isActive: boolean
   createdAt: string
   updatedAt: string
+  parentName?: string
   permissions?: Permission[]
   children: MenuItem[]
 }

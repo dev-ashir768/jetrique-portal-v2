@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { useMenus } from "@/hooks/use-rbac"
+import { useAllMenus} from "@/hooks/use-rbac"
 import { DataTable, SortableHeader, features } from "@/components/common/data-table"
 import { Badge } from "@/components/ui/badge"
 import type { ColumnDef } from "@tanstack/table-core"
@@ -31,10 +31,9 @@ const columns: ColumnDef<typeof features, MenuItem, any>[] = [
     ),
   },
   {
-    accessorKey: "order",
-    header: ({ column }: any) => (
-      <SortableHeader column={column} title="Order" />
-    ),
+    accessorKey: "parentName",
+    header: "Parent",
+    cell: ({ getValue }: any) => getValue() ?? "-",
   },
   {
     accessorKey: "isActive",
@@ -52,7 +51,7 @@ export function MenusTable() {
   const [params, setParams] = useState<MenusParams>({ page: 1, limit: 10 })
   const [activeFilters, setActiveFilters] = useState<Record<string, string>>({})
 
-  const { data, isLoading, refetch } = useMenus(params)
+  const { data, isLoading, refetch } = useAllMenus(params)
 
   const pagination = {
     page: params.page ?? 1,

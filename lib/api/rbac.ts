@@ -1,5 +1,5 @@
 import { apiClient } from "./client"
-import type { ApiResponse, MenuItem, MenusParams, MenusResponse } from "@/types"
+import type { MenusResponse, ApiResponse, MenuItem, MenusParams } from "@/types"
 
 export const rbacApi = {
   getMyMenus: () =>

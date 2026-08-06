@@ -20,9 +20,9 @@ export function useMyMenus() {
   })
 }
 
-export function useMenus(params?: MenusParams) {
+export function useAllMenus(params?: MenusParams) {
   return useQuery({
-    queryKey: ["rbac", "menus", params],
+    queryKey: ["rbac", "all-menus", params],
     queryFn: async () => {
       const { data } = await rbacApi.getMenus(params)
       return data.data
