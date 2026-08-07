@@ -34,3 +34,22 @@ export const editPermissionSchema = z.object({
 })
 
 export type EditPermissionFormValues = z.infer<typeof editPermissionSchema>
+
+export const createRoleSchema = z.object({
+  name: z.string().trim().min(1, "Name is required"),
+  slug: z.string().trim().min(1, "Slug is required"),
+  organizationType: z.string().min(1, "Organization type is required"),
+  isSystem: z.boolean(),
+  organizationId: z.string().trim().optional(),
+}).refine(
+  (data) => data.isSystem || (!!data.organizationId && data.organizationId.length > 0),
+  { message: "Organization ID is required for custom roles", path: ["organizationId"] },
+)
+
+export type CreateRoleFormValues = z.infer<typeof createRoleSchema>
+
+export const editRoleSchema = z.object({
+  name: z.string().trim().min(1, "Name is required"),
+})
+
+export type EditRoleFormValues = z.infer<typeof editRoleSchema>

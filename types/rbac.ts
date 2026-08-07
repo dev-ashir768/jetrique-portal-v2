@@ -79,6 +79,34 @@ export interface Role {
   id: UUID
   name: string
   slug: string
-  description: string
-  permissions: Permission[]
+  organizationType: string
+  organizationId: string | null
+  isSystem: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+export interface RolesParams {
+  page?: number
+  limit?: number
+  search?: string
+  organizationType?: string
+  isSystem?: boolean
+}
+
+export interface RolesResponse {
+  items: Role[]
+  meta: { total: number }
+}
+
+export interface CreateRolePayload {
+  name: string
+  slug: string
+  organizationType: string
+  isSystem: boolean
+  organizationId?: string
+}
+
+export interface UpdateRolePayload {
+  name?: string
 }

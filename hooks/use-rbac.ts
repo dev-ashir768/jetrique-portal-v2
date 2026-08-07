@@ -3,7 +3,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { getErrorMessage, rbacApi } from "@/lib/api"
 import { useRBACStore } from "@/stores"
-import type { MenusParams, CreateMenuPayload, UpdateMenuPayload, PermissionsParams, CreatePermissionPayload, UpdatePermissionPayload } from "@/types"
+import type { MenusParams, CreateMenuPayload, UpdateMenuPayload, PermissionsParams, CreatePermissionPayload, UpdatePermissionPayload, RolesParams, CreateRolePayload, UpdateRolePayload } from "@/types"
 import { toast } from "sonner"
 
 export function useMyMenus() {
@@ -97,6 +97,35 @@ export function useTogglePermissionActive(id: string, isActive: boolean) {
       queryClient.invalidateQueries({ queryKey: ["rbac", "all-permissions"] })
       toast.success("Permission updated")
     },
+    onError: (error: Error) => toast.error(getErrorMessage(error)),
+  })
+}
+
+export function useAllRoles(params?: RolesParams) {
+  return useQuery({
+    queryKey: ["rbac", "all-roles", params],
+    queryFn: async () => {
+      const { data } = await rbacApi.getRoles(params)
+      return data.data
+    },
+    staleTime: 5 * 60 * 1000,
+  })
+}
+
+export function useCreateRole() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (payload: CreateRolePayload) => rbacApi.createRole(payload),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["rbac", "all-roles"] }),
+    onError: (error: Error) => toast.error(getErrorMessage(error)),
+  })
+}
+
+export function useUpdateRole(id: string) {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (payload: UpdateRolePayload) => rbacApi.updateRole(id, payload),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["rbac", "all-roles"] }),
     onError: (error: Error) => toast.error(getErrorMessage(error)),
   })
 }
