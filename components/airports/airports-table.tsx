@@ -7,16 +7,17 @@ import { Switch } from "@/components/ui/switch"
 import { DataTable, SortableHeader, features } from "@/components/common/data-table"
 import { PageHeader } from "@/components/common/page-header"
 import { useAirports, useSetAirportActive } from "@/hooks/use-airports"
+import { usePermissions } from "@/hooks/use-permission"
 import { AirportFormDialog } from "./airport-form-dialog"
 import type { ColumnDef } from "@tanstack/table-core"
 import type { Airport, AirportFilters } from "@/types/airports"
 
-function ActiveToggle({ airport }: { airport: Airport }) {
+function ActiveToggle({ airport, canUpdate }: { airport: Airport; canUpdate: boolean }) {
   const { mutate, isPending } = useSetAirportActive(airport.id)
   return (
     <Switch
       checked={airport.isActive}
-      disabled={isPending}
+      disabled={isPending || !canUpdate}
       onCheckedChange={(checked) => mutate(checked)}
     />
   )
@@ -29,6 +30,7 @@ export function AirportsTable() {
   const [editingAirport, setEditingAirport] = useState<Airport | null>(null)
 
   const { data, isLoading, refetch } = useAirports(filters)
+  const perms = usePermissions("airports", ["create", "update"])
 
   const pagination = {
     page: filters.page ?? 1,
@@ -76,26 +78,30 @@ export function AirportsTable() {
     {
       id: "isActive",
       header: "Active",
-      cell: ({ row }) => <ActiveToggle airport={row.original} />,
+      cell: ({ row }) => <ActiveToggle airport={row.original} canUpdate={perms.update} />,
     },
-    {
-      id: "actions",
-      header: "",
-      cell: ({ row }) => (
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-8 w-8"
-          onClick={(e) => {
-            e.stopPropagation()
-            setEditingAirport(row.original)
-            setDialogOpen(true)
-          }}
-        >
-          <Pencil className="h-3.5 w-3.5" />
-        </Button>
-      ),
-    },
+    ...(perms.update
+      ? [
+          {
+            id: "actions",
+            header: "",
+            cell: ({ row }: { row: { original: Airport } }) => (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setEditingAirport(row.original)
+                  setDialogOpen(true)
+                }}
+              >
+                <Pencil className="h-3.5 w-3.5" />
+              </Button>
+            ),
+          } as ColumnDef<typeof features, Airport>,
+        ]
+      : []),
   ]
 
   function handleFilterChange(incoming: Record<string, string>) {
@@ -115,10 +121,11 @@ export function AirportsTable() {
   return (
     <>
       <PageHeader title="Airports" description="Manage airport locations and their details">
-        <Button onClick={handleAdd} className="gap-1.5">
-          <Plus className="h-4 w-4" />
-          Add Airport
-        </Button>
+        {perms.create && (
+          <Button onClick={handleAdd}>
+            Add Airport
+          </Button>
+        )}
       </PageHeader>
 
       <DataTable
@@ -148,14 +155,16 @@ export function AirportsTable() {
         emptyMessage="No airports found."
       />
 
-      <AirportFormDialog
-        open={dialogOpen}
-        onOpenChange={(o) => {
-          setDialogOpen(o)
-          if (!o) setEditingAirport(null)
-        }}
-        airport={editingAirport}
-      />
+      {(perms.create || perms.update) && (
+        <AirportFormDialog
+          open={dialogOpen}
+          onOpenChange={(o) => {
+            setDialogOpen(o)
+            if (!o) setEditingAirport(null)
+          }}
+          airport={editingAirport}
+        />
+      )}
     </>
   )
 }

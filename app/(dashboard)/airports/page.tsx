@@ -2,7 +2,7 @@ import { AirportsTable } from "@/components/airports/airports-table"
 
 export default function AirportsPage() {
   return (
-    <div className="container py-6">
+    <div className="container flex flex-col gap-6">
       <AirportsTable />
     </div>
   )
