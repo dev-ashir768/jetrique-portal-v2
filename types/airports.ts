@@ -12,7 +12,11 @@ export interface Airport {
   createdAt: string
   updatedAt: string
   location: Location & {
-    parent?: Location | null
+    parent?: (Location & {
+      parent?: (Location & {
+        parent?: Location | null
+      }) | null
+    }) | null
   }
 }
 

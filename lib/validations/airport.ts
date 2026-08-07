@@ -10,7 +10,7 @@ export const airportSchema = z.object({
     .max(4, "IATA code must be 3–4 characters")
     .regex(/^[A-Z]+$/, "IATA code must be uppercase letters only"),
   terminal: z.string().trim().optional().or(z.literal("")),
-  handlingFees: z.number().positive("Must be positive").optional().or(z.literal("")),
+  handlingFees: z.number().positive("Must be positive").optional(),
   timezone: z.string().trim().optional().or(z.literal("")),
   // location cascade (not sent to API, only for UI state)
   _countryId: z.string().optional(),

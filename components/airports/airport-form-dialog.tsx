@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/dialog"
 import { ReactSelectSingle, type SelectOption } from "@/components/ui/react-select"
 import { useCountries, useProvinces, useCities, useAirportLocations } from "@/hooks/use-locations"
-import { useCreateAirport, useUpdateAirport } from "@/hooks/use-airports"
+import { useAirport, useCreateAirport, useUpdateAirport } from "@/hooks/use-airports"
 import { airportSchema, type AirportFormValues } from "@/lib/validations/airport"
 import type { Airport } from "@/types/airports"
 import type { Location } from "@/types"
@@ -36,6 +36,9 @@ export function AirportFormDialog({ open, onOpenChange, airport }: Props) {
   const [provinceId, setProvinceId] = useState<string | null>(null)
   const [cityId, setCityId] = useState<string | null>(null)
 
+  // Fetch full detail (with nested parent chain) when editing
+  const { data: airportDetail, isLoading: loadingDetail } = useAirport(airport?.id ?? "")
+
   const { data: countries = [], isLoading: loadingCountries } = useCountries()
   const { data: provinces = [], isLoading: loadingProvinces } = useProvinces(countryId)
   const { data: cities = [], isLoading: loadingCities } = useCities(provinceId)
@@ -44,6 +47,7 @@ export function AirportFormDialog({ open, onOpenChange, airport }: Props) {
   const { mutateAsync: create, isPending: creating } = useCreateAirport()
   const { mutateAsync: update, isPending: updating } = useUpdateAirport(airport?.id ?? "")
   const isPending = creating || updating
+  const formLoading = isEdit && loadingDetail
 
   const {
     register,
@@ -59,7 +63,7 @@ export function AirportFormDialog({ open, onOpenChange, airport }: Props) {
       name: "",
       iataCode: "",
       terminal: "",
-      handlingFees: "",
+      handlingFees: undefined,
       timezone: "",
       _countryId: "",
       _provinceId: "",
@@ -69,24 +73,32 @@ export function AirportFormDialog({ open, onOpenChange, airport }: Props) {
 
   const locationId = watch("locationId")
 
-  // Populate form when editing
+  // Populate form when editing — wait for full detail with parent chain
   useEffect(() => {
     if (!open) return
-    if (airport) {
-      setValue("locationId", airport.locationId)
-      setValue("name", airport.name)
-      setValue("iataCode", airport.iataCode)
-      setValue("terminal", airport.terminal ?? "")
-      setValue("handlingFees", airport.handlingFees ? Number(airport.handlingFees) : "")
-      setValue("timezone", airport.timezone ?? "")
-      // We don't pre-fill cascade since we'd need parent chain; user can leave as-is
-    } else {
+    if (isEdit && airportDetail) {
+      setValue("locationId", airportDetail.locationId)
+      setValue("name", airportDetail.name)
+      setValue("iataCode", airportDetail.iataCode)
+      setValue("terminal", airportDetail.terminal ?? "")
+      setValue("handlingFees", airportDetail.handlingFees ? Number(airportDetail.handlingFees) : undefined)
+      setValue("timezone", airportDetail.timezone ?? "")
+
+      // Traverse nested parent chain: AIRPORT → CITY → PROVINCE → COUNTRY
+      const city = airportDetail.location?.parent ?? null
+      const province = city?.parent ?? null
+      const country = province?.parent ?? null
+
+      setCountryId(country?.id ?? null)
+      setProvinceId(province?.id ?? null)
+      setCityId(city?.id ?? null)
+    } else if (!isEdit) {
       reset()
       setCountryId(null)
       setProvinceId(null)
       setCityId(null)
     }
-  }, [open, airport, setValue, reset])
+  }, [open, isEdit, airportDetail, setValue, reset])
 
   async function onSubmit(values: AirportFormValues) {
     const payload = {
@@ -94,9 +106,7 @@ export function AirportFormDialog({ open, onOpenChange, airport }: Props) {
       name: values.name,
       iataCode: values.iataCode,
       ...(values.terminal ? { terminal: values.terminal } : {}),
-      ...(values.handlingFees !== "" && values.handlingFees !== undefined
-        ? { handlingFees: Number(values.handlingFees) }
-        : {}),
+      ...(values.handlingFees !== undefined ? { handlingFees: values.handlingFees } : {}),
       ...(values.timezone ? { timezone: values.timezone } : {}),
     }
 
@@ -124,7 +134,12 @@ export function AirportFormDialog({ open, onOpenChange, airport }: Props) {
           <DialogTitle>{isEdit ? "Edit Airport" : "Add Airport"}</DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+        {formLoading ? (
+          <div className="flex h-40 items-center justify-center text-sm text-muted-foreground">
+            Loading…
+          </div>
+        ) : null}
+        <form onSubmit={handleSubmit(onSubmit)} className={`flex flex-col gap-4${formLoading ? " hidden" : ""}`}>
           {/* Location cascade */}
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col gap-1.5">
@@ -244,7 +259,9 @@ export function AirportFormDialog({ open, onOpenChange, airport }: Props) {
                 type="number"
                 min={0}
                 placeholder="e.g. 5000"
-                {...register("handlingFees", { valueAsNumber: true })}
+                {...register("handlingFees", {
+                  setValueAs: (v) => (v === "" || v === null ? undefined : Number(v)),
+                })}
               />
               {errors.handlingFees && (
                 <p className="text-xs text-destructive">{errors.handlingFees.message}</p>
