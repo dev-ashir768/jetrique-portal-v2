@@ -10,3 +10,27 @@ export const createMenuSchema = z.object({
 })
 
 export type CreateMenuFormValues = z.infer<typeof createMenuSchema>
+
+
+export const editMenuSchema = z.object({
+  name: z.string().trim().min(1, "Name is required"),
+  icon: z.string().trim().min(1, "Icon is required"),
+  order: z.number().min(1),
+  path: z.string().trim().optional(),
+  parentId: z.string().optional(),
+})
+
+export type EditMenuFormValues = z.infer<typeof editMenuSchema>
+
+export const createPermissionSchema = z.object({
+  name: z.string().trim().min(1, "Name is required"),
+  slug: z.string().trim().min(1, "Slug is required"),
+})
+
+export type CreatePermissionFormValues = z.infer<typeof createPermissionSchema>
+
+export const editPermissionSchema = z.object({
+  name: z.string().trim().min(1, "Name is required"),
+})
+
+export type EditPermissionFormValues = z.infer<typeof editPermissionSchema>

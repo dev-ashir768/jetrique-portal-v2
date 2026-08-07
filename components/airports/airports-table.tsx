@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Plus, Pencil } from "lucide-react"
+import { Pencil } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
 import { DataTable, SortableHeader, features } from "@/components/common/data-table"
@@ -30,7 +30,7 @@ export function AirportsTable() {
   const [editingAirport, setEditingAirport] = useState<Airport | null>(null)
 
   const { data, isLoading, refetch } = useAirports(filters)
-  const perms = usePermissions("airports", ["create", "update"])
+  const perms = usePermissions("airports", ["approve", "create", "delete", "export", "read", "reject", "suspend", "update"])
 
   const pagination = {
     page: filters.page ?? 1,

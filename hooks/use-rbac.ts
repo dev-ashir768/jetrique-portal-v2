@@ -1,9 +1,10 @@
 "use client"
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { rbacApi } from "@/lib/api"
+import { getErrorMessage, rbacApi } from "@/lib/api"
 import { useRBACStore } from "@/stores"
-import type { MenusParams, CreateMenuPayload } from "@/types"
+import type { MenusParams, CreateMenuPayload, UpdateMenuPayload, PermissionsParams, CreatePermissionPayload, UpdatePermissionPayload } from "@/types"
+import { toast } from "sonner"
 
 export function useMyMenus() {
   const { setMenus } = useRBACStore()
@@ -39,13 +40,63 @@ export function useCreateMenu() {
   })
 }
 
-export function useToggleMenuActive() {
+export function useUpdateMenu(id: string) {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: ({ id, isActive }: { id: string; isActive: boolean }) =>
-      rbacApi.toggleMenuActive(id, isActive),
+    mutationFn: (payload: UpdateMenuPayload) => rbacApi.updateMenu(id, payload),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["rbac", "all-menus"] }),
+    onError: (error: Error) => toast.error(getErrorMessage(error)),
+  })
+}
+
+export function useToggleMenuActive(id: string, isActive: boolean) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: () => rbacApi.toggleMenuActive(id, isActive),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["rbac", "all-menus"] })
+      queryClient.invalidateQueries({ queryKey: ["rbac", "all-menus"] })
     },
+    onError: (error: Error) => toast.error(getErrorMessage(error)),
+  })
+}
+
+export function useAllPermissions(params?: PermissionsParams) {
+  return useQuery({
+    queryKey: ["rbac", "all-permissions", params],
+    queryFn: async () => {
+      const { data } = await rbacApi.getPermissions(params)
+      return data.data
+    },
+    staleTime: 5 * 60 * 1000,
+  })
+}
+
+export function useCreatePermission() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (payload: CreatePermissionPayload) => rbacApi.createPermission(payload),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["rbac", "all-permissions"] }),
+    onError: (error: Error) => toast.error(getErrorMessage(error)),
+  })
+}
+
+export function useUpdatePermission(id: string) {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (payload: UpdatePermissionPayload) => rbacApi.updatePermission(id, payload),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["rbac", "all-permissions"] }),
+    onError: (error: Error) => toast.error(getErrorMessage(error)),
+  })
+}
+
+export function useTogglePermissionActive(id: string, isActive: boolean) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: () => rbacApi.togglePermissionActive(id, isActive),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["rbac", "all-permissions"] })
+      toast.success("Permission updated")
+    },
+    onError: (error: Error) => toast.error(getErrorMessage(error)),
   })
 }

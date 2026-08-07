@@ -1,9 +1,11 @@
-import { MenusPageContent } from "../../../../components/rbac/menu/menus-page-content"
+import { MenusTable } from "@/components/rbac/menu/menus-table"
 
 export const metadata = {
   title: "Menus",
 }
 
 export default function MenusPage() {
-  return <MenusPageContent />
+  return (
+    <MenusTable />
+  )
 }

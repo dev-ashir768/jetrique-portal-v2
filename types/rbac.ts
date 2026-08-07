@@ -4,6 +4,29 @@ export interface Permission {
   id: UUID
   name: string
   slug: string
+  isActive: boolean
+  createdAt: string
+}
+
+export interface PermissionsParams {
+  page?: number
+  limit?: number
+  search?: string
+  isActive?: boolean
+}
+
+export interface PermissionsResponse {
+  items: Permission[]
+  meta: { total: number }
+}
+
+export interface CreatePermissionPayload {
+  name: string
+  slug: string
+}
+
+export interface UpdatePermissionPayload {
+  name?: string
 }
 
 export interface MenuItem {
@@ -41,6 +64,15 @@ export interface CreateMenuPayload {
   order: number
   path?: string | null
   parentId?: string | null
+}
+
+export interface UpdateMenuPayload {
+  name?: string
+  slug?: string
+  path?: string
+  icon?: string
+  parentId?: string
+  order?: number
 }
 
 export interface Role {
