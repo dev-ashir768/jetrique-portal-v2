@@ -119,3 +119,24 @@ export interface RolePermissionEntry {
 export interface AssignRolePermissionsPayload {
   permissions: RolePermissionEntry[]
 }
+
+export interface RolePermissionMenu {
+  menu: {
+    id: string
+    name: string
+    slug: string
+    path: string | null
+    icon: string
+    parentId: string | null
+  }
+  permissions: {
+    id: string
+    name: string
+    slug: string
+  }[]
+}
+
+export interface RolePermissionsResponse {
+  role: { id: string; name: string; slug: string }
+  menus: RolePermissionMenu[]
+}

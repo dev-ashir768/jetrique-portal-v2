@@ -3,11 +3,10 @@
 import { useState } from "react"
 import { Plus, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { ReactSelectSingle } from "@/components/ui/react-select"
 import { useAssignRolePermissions, useAllMenus, useAllPermissions } from "@/hooks/use-rbac"
-import type { Role, RolePermissionEntry } from "@/types"
+import type { Role, RolePermissionEntry, SelectOption } from "@/types"
 
 interface Props {
   role: Role
@@ -24,8 +23,8 @@ export function AssignPermissionsDialog({ role, open, onOpenChange }: Props) {
   const { data: menusData } = useAllMenus({ isActive: true, limit: 100 })
   const { data: permissionsData } = useAllPermissions({ isActive: true, limit: 100 })
 
-  const menuOptions = (menusData?.items ?? []).map((m) => ({ label: m.name, value: m.id }))
-  const permissionOptions = (permissionsData?.items ?? []).map((p) => ({ label: p.name, value: p.id }))
+  const menuOptions: SelectOption[] = (menusData?.items ?? []).map((m) => ({ label: m.name, value: m.id }))
+  const permissionOptions: SelectOption[] = (permissionsData?.items ?? []).map((p) => ({ label: p.name, value: p.id }))
 
   function updateRow(index: number, field: keyof RolePermissionEntry, value: string) {
     setRows((prev) => prev.map((r, i) => i === index ? { ...r, [field]: value } : r))
@@ -62,10 +61,9 @@ export function AssignPermissionsDialog({ role, open, onOpenChange }: Props) {
         </DialogHeader>
 
         <div className="flex flex-col gap-3">
-          <div className="grid grid-cols-[1fr_1fr_auto] gap-2 text-xs text-muted-foreground px-1">
+          <div className="grid grid-cols-[1fr_1fr_auto] gap-2 text-xs text-muted-foreground">
             <span>Menu</span>
             <span>Permission</span>
-            <span />
           </div>
 
           {rows.map((row, index) => (

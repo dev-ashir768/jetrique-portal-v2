@@ -136,7 +136,32 @@ export function useAssignRolePermissions(id: string) {
     mutationFn: (payload: AssignRolePermissionsPayload) => rbacApi.assignRolePermissions(id, payload),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["rbac", "all-roles"] })
+      qc.invalidateQueries({ queryKey: ["rbac", "role-permissions", id] })
       toast.success("Permissions assigned")
+    },
+    onError: (error: Error) => toast.error(getErrorMessage(error)),
+  })
+}
+
+export function useRolePermissions(id: string) {
+  return useQuery({
+    queryKey: ["rbac", "role-permissions", id],
+    queryFn: async () => {
+      const { data } = await rbacApi.getRolePermissions(id)
+      return data.data
+    },
+    enabled: !!id,
+    staleTime: 2 * 60 * 1000,
+  })
+}
+
+export function useRemoveRolePermissions(id: string) {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (payload: AssignRolePermissionsPayload) => rbacApi.removeRolePermissions(id, payload),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["rbac", "role-permissions", id] })
+      toast.success("Permission removed")
     },
     onError: (error: Error) => toast.error(getErrorMessage(error)),
   })
