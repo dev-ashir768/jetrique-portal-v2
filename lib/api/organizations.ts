@@ -20,6 +20,9 @@ export const organizationsApi = {
   getDocuments: (id: string) =>
     apiClient.get<ApiResponse<OrganizationDocument[]>>(`/organizations/${id}/documents`),
 
+  getMyDocuments: () =>
+    apiClient.get<ApiResponse<OrganizationDocument[]>>("/organizations/my/documents"),
+
   verifyDocument: (orgId: string, docId: string) =>
     apiClient.patch<ApiResponse<OrganizationDocument>>(
       `/organizations/${orgId}/documents/${docId}/verify`,
@@ -39,4 +42,14 @@ export const organizationsApi = {
 
   suspend: (id: string, remarks: string) =>
     apiClient.patch<ApiResponse<Organization>>(`/organizations/${id}/suspend`, { remarks }),
+
+  reuploadDocument: (orgId: string, docId: string, file: File) => {
+    const formData = new FormData()
+    formData.append("document", file)
+    return apiClient.patch<ApiResponse<OrganizationDocument>>(
+      `/organizations/${orgId}/documents/${docId}/reupload`,
+      formData,
+      { headers: { "Content-Type": "multipart/form-data" } },
+    )
+  },
 }

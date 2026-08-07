@@ -19,7 +19,8 @@ export function useLogin(setError?: UseFormSetError<LoginFormValues>) {
     onSuccess: ({ data }) => {
       setAuth(data.data.user, data.data.token)
       toast.success(data.message)
-      router.push("/dashboard")
+      const orgStatus = data.data.user.organization?.status
+      router.push(orgStatus === "REJECTED" ? "/reupload-documents" : "/dashboard")
     },
     onError: (error: Error) => {
       const fieldErrors = getFieldErrors(error)

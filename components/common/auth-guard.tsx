@@ -60,12 +60,19 @@ export function AuthGuard({ children }: { children: ReactNode }) {
     }
   }, [hydrated])
 
+  const user = useAuthStore((s) => s.user)
+
   // Redirect to login
   useEffect(() => {
     if (hydrated && !isAuthenticated) {
       router.replace("/login")
+      return
     }
-  }, [hydrated, isAuthenticated, router])
+    // REJECTED org users must stay on the reupload page only
+    if (hydrated && isAuthenticated && user?.organization?.status === "REJECTED") {
+      router.replace("/reupload-documents")
+    }
+  }, [hydrated, isAuthenticated, user, router])
 
   // Only check route permission AFTER fresh menus are fetched from API.
   // Never redirect based on stale localStorage — that causes the refresh-redirect bug.

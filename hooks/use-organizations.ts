@@ -117,3 +117,26 @@ export function useSuspendOrganization() {
     onError: (error: Error) => toast.error(getErrorMessage(error)),
   })
 }
+
+export function useReuploadOrgDocument(orgId: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ docId, file }: { docId: string; file: File }) =>
+      organizationsApi.reuploadDocument(orgId, docId, file),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["organization-documents", orgId] })
+      toast.success("Document uploaded successfully")
+    },
+    onError: (error: Error) => toast.error(getErrorMessage(error)),
+  })
+}
+
+export function useMyOrgDocuments() {
+  return useQuery({
+    queryKey: ["my-org-documents"],
+    queryFn: async () => {
+      const { data } = await organizationsApi.getMyDocuments()
+      return data.data
+    },
+  })
+}
