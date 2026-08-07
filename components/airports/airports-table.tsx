@@ -109,7 +109,7 @@ export function AirportsTable() {
     setFilters((prev) => ({
       ...prev,
       page: 1,
-      isActive: incoming.isActive !== undefined ? incoming.isActive === "true" : undefined,
+      isActive: incoming.isActive ? incoming.isActive === "true" : undefined,
     }))
   }
 
