@@ -127,7 +127,7 @@ function SidebarContent({ isCollapsed }: { isCollapsed: boolean }) {
   const { menus } = useRBACStore()
 
   return (
-    <div className="flex h-full flex-col overflow-hidden rounded-tl-xl bg-sidebar">
+    <div className="flex h-full flex-col overflow-hidden rounded-tl-2xl bg-sidebar">
       <ScrollArea className="flex-1 px-2 py-3">
         {isLoading ? (
           <SidebarSkeleton />
@@ -154,7 +154,7 @@ export function Sidebar() {
     <>
       <aside
         className={cn(
-          "hidden flex-col rounded-tl-xl transition-all duration-300 md:flex",
+          "hidden flex-col rounded-tl-2xl transition-all duration-300 md:flex",
           isCollapsed ? "w-16" : "w-58",
         )}
       >
