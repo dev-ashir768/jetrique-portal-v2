@@ -47,3 +47,15 @@ export function useCities(provinceId: string | null) {
     staleTime: 10 * 60 * 1000,
   })
 }
+
+export function useAirportLocations(cityId: string | null) {
+  return useQuery<Location[]>({
+    queryKey: ["locations", "AIRPORT", cityId],
+    queryFn: () =>
+      publicApi
+        .getLocations({ type: "AIRPORT", parentId: cityId! })
+        .then((r) => extractLocations(r.data.data)),
+    enabled: !!cityId,
+    staleTime: 10 * 60 * 1000,
+  })
+}
