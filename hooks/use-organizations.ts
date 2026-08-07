@@ -2,8 +2,9 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
-import { organizationsApi } from "@/lib/api"
+import { organizationsApi, authApi } from "@/lib/api"
 import { getErrorMessage } from "@/lib/api/client"
+import { useAuthStore } from "@/stores"
 import type { OrganizationFilters } from "@/types/organizations"
 
 export function useOperators(filters?: OrganizationFilters) {
@@ -120,13 +121,21 @@ export function useSuspendOrganization() {
 
 export function useReuploadOrgDocument(orgId: string) {
   const queryClient = useQueryClient()
+  const setUser = useAuthStore((s) => s.setUser)
   return useMutation({
     mutationFn: ({ docId, file }: { docId: string; file: File }) =>
       organizationsApi.reuploadDocument(orgId, docId, file),
-    onSuccess: () => {
+    onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ["organization-documents", orgId] })
       queryClient.invalidateQueries({ queryKey: ["my-org-documents"] })
       toast.success("Document uploaded successfully")
+      // Refresh user so guards react to updated org status (e.g. REJECTED → PENDING)
+      try {
+        const { data } = await authApi.me()
+        setUser(data.data)
+      } catch {
+        // ignore — user will see updated status on next login
+      }
     },
     onError: (error: Error) => toast.error(getErrorMessage(error)),
   })

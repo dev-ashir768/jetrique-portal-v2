@@ -68,9 +68,10 @@ export function AuthGuard({ children }: { children: ReactNode }) {
       router.replace("/login")
       return
     }
-    // REJECTED org users must stay on the reupload page only
-    if (hydrated && isAuthenticated && user?.organization?.status === "REJECTED") {
-      router.replace("/reupload-documents")
+    if (hydrated && isAuthenticated) {
+      const orgStatus = user?.organization?.status
+      if (orgStatus === "REJECTED") router.replace("/reupload-documents")
+      else if (orgStatus === "PENDING") router.replace("/pending-approval")
     }
   }, [hydrated, isAuthenticated, user, router])
 

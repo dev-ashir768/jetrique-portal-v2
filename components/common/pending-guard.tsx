@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { useAuthStore } from "@/stores"
 import { Spinner } from "@/components/ui/spinner"
 
-export function ReuploadGuard({ children }: { children: ReactNode }) {
+export function PendingGuard({ children }: { children: ReactNode }) {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
   const user = useAuthStore((s) => s.user)
   const router = useRouter()
@@ -22,13 +22,10 @@ export function ReuploadGuard({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!hydrated) return
-    if (!isAuthenticated) {
-      router.replace("/login")
-      return
-    }
+    if (!isAuthenticated) { router.replace("/login"); return }
     const orgStatus = user?.organization?.status
-    if (orgStatus === "PENDING") router.replace("/pending-approval")
-    else if (orgStatus !== "REJECTED") router.replace("/dashboard")
+    if (orgStatus === "REJECTED") router.replace("/reupload-documents")
+    else if (orgStatus !== "PENDING") router.replace("/dashboard")
   }, [hydrated, isAuthenticated, user, router])
 
   if (!hydrated) {
@@ -39,8 +36,7 @@ export function ReuploadGuard({ children }: { children: ReactNode }) {
     )
   }
 
-  if (!isAuthenticated || user?.organization?.status !== "REJECTED") return null
-
+  if (!isAuthenticated || user?.organization?.status !== "PENDING") return null
 
   return <>{children}</>
 }

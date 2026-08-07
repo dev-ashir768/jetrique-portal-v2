@@ -1,5 +1,6 @@
 export { AuthGuard } from "./auth-guard"
 export { ReuploadGuard } from "./reupload-guard"
+export { PendingGuard } from "./pending-guard"
 export { GuestGuard } from "./guest-guard"
 export { PageHeader } from "./page-header"
 export { StatusBadge } from "./status-badge"
