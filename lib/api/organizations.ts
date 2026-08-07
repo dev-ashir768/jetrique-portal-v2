@@ -8,11 +8,8 @@ import type {
 } from "@/types/organizations"
 
 export const organizationsApi = {
-  getOperators: (params?: OrganizationFilters) =>
-    apiClient.get<PaginatedApiResponse<Organization>>("/organizations/operators", { params }),
-
-  getAgents: (params?: OrganizationFilters) =>
-    apiClient.get<PaginatedApiResponse<Organization>>("/organizations/agents", { params }),
+  getOrganizations: (params?: OrganizationFilters) =>
+    apiClient.get<PaginatedApiResponse<Organization>>("/organizations", { params }),
 
   getById: (id: string) =>
     apiClient.get<ApiResponse<Organization>>(`/organizations/${id}`),

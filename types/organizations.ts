@@ -70,4 +70,6 @@ export interface OrganizationFilters {
   search?: string
   status?: OrganizationStatus
   organizationId?: string
+  type?: string
+  agentCategory?: string
 }

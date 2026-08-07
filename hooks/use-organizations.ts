@@ -5,23 +5,14 @@ import { toast } from "sonner"
 import { organizationsApi, authApi } from "@/lib/api"
 import { getErrorMessage } from "@/lib/api/client"
 import { useAuthStore } from "@/stores"
+
 import type { OrganizationFilters } from "@/types/organizations"
 
-export function useOperators(filters?: OrganizationFilters) {
+export function useOrganizations(filters?: OrganizationFilters) {
   return useQuery({
-    queryKey: ["operators", filters],
+    queryKey: ["organizations", filters],
     queryFn: async () => {
-      const { data } = await organizationsApi.getOperators(filters)
-      return data.data
-    },
-  })
-}
-
-export function useAgents(filters?: OrganizationFilters) {
-  return useQuery({
-    queryKey: ["agents", filters],
-    queryFn: async () => {
-      const { data } = await organizationsApi.getAgents(filters)
+      const { data } = await organizationsApi.getOrganizations(filters)
       return data.data
     },
   })
@@ -81,8 +72,7 @@ export function useApproveOrganization() {
       organizationsApi.approve(id, commissionRate !== undefined ? { commissionRate } : undefined),
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: ["organization", id] })
-      queryClient.invalidateQueries({ queryKey: ["operators"] })
-      queryClient.invalidateQueries({ queryKey: ["agents"] })
+      queryClient.invalidateQueries({ queryKey: ["organizations"], exact: false })
       toast.success("Organization approved")
     },
     onError: (error: Error) => toast.error(getErrorMessage(error)),
@@ -96,8 +86,7 @@ export function useRejectOrganization() {
       organizationsApi.reject(id, remarks),
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: ["organization", id] })
-      queryClient.invalidateQueries({ queryKey: ["operators"] })
-      queryClient.invalidateQueries({ queryKey: ["agents"] })
+      queryClient.invalidateQueries({ queryKey: ["organizations"], exact: false })
       toast.success("Organization rejected")
     },
     onError: (error: Error) => toast.error(getErrorMessage(error)),
@@ -111,8 +100,7 @@ export function useSuspendOrganization() {
       organizationsApi.suspend(id, remarks),
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: ["organization", id] })
-      queryClient.invalidateQueries({ queryKey: ["operators"] })
-      queryClient.invalidateQueries({ queryKey: ["agents"] })
+      queryClient.invalidateQueries({ queryKey: ["organizations"], exact: false })
       toast.success("Organization suspended")
     },
     onError: (error: Error) => toast.error(getErrorMessage(error)),

@@ -1,6 +1,6 @@
 import { OrganizationDetail } from "@/components/organizations/organization-detail"
 
-export default async function OperatorDetailPage({
+export default async function OrganizationDetailPage({
   params,
 }: {
   params: Promise<{ id: string }>

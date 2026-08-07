@@ -53,7 +53,7 @@ export function StatusBadge({ status, className, onClick, disabled }: StatusBadg
   const key =
     typeof status === "boolean"
       ? status ? "ACTIVE" : "INACTIVE"
-      : status.toUpperCase()
+      : status?.toUpperCase() ?? ""
 
   const styles = STATUS_STYLES[key] ?? "bg-muted text-muted-foreground border-border"
   const label  = STATUS_LABELS[key] ?? key
