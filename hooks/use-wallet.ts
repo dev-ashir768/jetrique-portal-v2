@@ -3,6 +3,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { walletApi } from "@/lib/api"
+import { getErrorMessage } from "@/lib/api/client"
 import type { TopUpPayload, BudgetAllocation, PaginationParams } from "@/types"
 
 export function useWallet() {
@@ -35,10 +36,7 @@ export function useTopUp() {
       qc.invalidateQueries({ queryKey: ["wallet"] })
       qc.invalidateQueries({ queryKey: ["wallet-transactions"] })
     },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    onError: (error: any) => {
-      toast.error(error.response?.data?.message || "Top-up failed")
-    },
+    onError: (error: Error) => toast.error(getErrorMessage(error)),
   })
 }
 
