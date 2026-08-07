@@ -110,3 +110,12 @@ export interface CreateRolePayload {
 export interface UpdateRolePayload {
   name?: string
 }
+
+export interface RolePermissionEntry {
+  menuId: string
+  permissionId: string
+}
+
+export interface AssignRolePermissionsPayload {
+  permissions: RolePermissionEntry[]
+}

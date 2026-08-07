@@ -1,5 +1,5 @@
 import { apiClient } from "./client"
-import type { MenusResponse, ApiResponse, MenuItem, MenusParams, CreateMenuPayload, UpdateMenuPayload, PermissionsResponse, Permission, PermissionsParams, CreatePermissionPayload, UpdatePermissionPayload, RolesResponse, Role, RolesParams, CreateRolePayload, UpdateRolePayload } from "@/types"
+import type { MenusResponse, ApiResponse, MenuItem, MenusParams, CreateMenuPayload, UpdateMenuPayload, PermissionsResponse, Permission, PermissionsParams, CreatePermissionPayload, UpdatePermissionPayload, RolesResponse, Role, RolesParams, CreateRolePayload, UpdateRolePayload, AssignRolePermissionsPayload } from "@/types"
 
 export const rbacApi = {
   getMyMenus: () =>
@@ -37,4 +37,7 @@ export const rbacApi = {
 
   updateRole: (id: string, payload: UpdateRolePayload) =>
     apiClient.patch<ApiResponse<Role>>(`/rbac/roles/${id}`, payload),
+
+  assignRolePermissions: (id: string, payload: AssignRolePermissionsPayload) =>
+    apiClient.patch<ApiResponse<Role>>(`/rbac/roles/${id}/permissions/add`, payload),
 }

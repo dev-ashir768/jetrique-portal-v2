@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Pencil } from "lucide-react"
+import { Pencil, ShieldPlus } from "lucide-react"
 import { useAllRoles } from "@/hooks/use-rbac"
 import { DataTable, SortableHeader, features } from "@/components/common/data-table"
 import { Button } from "@/components/ui/button"
@@ -10,6 +10,7 @@ import { PageHeader } from "@/components/common"
 import { usePermissions } from "@/hooks/use-permission"
 import { CreateRoleDialog } from "./create-role-dialog"
 import { EditRoleDialog } from "./edit-role-dialog"
+import { AssignPermissionsDialog } from "./assign-permissions-dialog"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import type { ColumnDef } from "@tanstack/table-core"
 import type { Role, RolesParams } from "@/types"
@@ -18,6 +19,7 @@ export function RolesTable() {
   const [params, setParams] = useState<RolesParams>({ page: 1, limit: 10 })
   const [activeFilters, setActiveFilters] = useState<Record<string, string>>({})
   const [editingRole, setEditingRole] = useState<Role | null>(null)
+  const [assigningRole, setAssigningRole] = useState<Role | null>(null)
 
   const { data, isLoading, refetch } = useAllRoles(params)
   const perms = usePermissions("roles", ["create", "update"])
@@ -57,20 +59,30 @@ export function RolesTable() {
             id: "actions",
             header: "",
             cell: ({ row }: { row: { original: Role } }) => (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="secondary" size="icon" className="h-8 w-8"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      setEditingRole(row.original)
-                    }}
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Edit</TooltipContent>
-              </Tooltip>
+              <div className="flex items-center gap-1">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="secondary" size="icon" className="h-8 w-8"
+                      onClick={(e) => { e.stopPropagation(); setAssigningRole(row.original) }}
+                    >
+                      <ShieldPlus className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Assign Permissions</TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="secondary" size="icon" className="h-8 w-8"
+                      onClick={(e) => { e.stopPropagation(); setEditingRole(row.original) }}
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Edit</TooltipContent>
+                </Tooltip>
+              </div>
             ),
           } as ColumnDef<typeof features, Role>,
         ]
@@ -105,6 +117,13 @@ export function RolesTable() {
             onOpenChange={(o) => { if (!o) setEditingRole(null) }}
           />
         )}
+        {perms.update && assigningRole && (
+          <AssignPermissionsDialog
+            role={assigningRole}
+            open={!!assigningRole}
+            onOpenChange={(o) => { if (!o) setAssigningRole(null) }}
+          />
+        )}
       </PageHeader>
 
       <DataTable
@@ -134,8 +153,8 @@ export function RolesTable() {
             label: "System",
             type: "select",
             options: [
-              { label: "System", value: "true" },
-              { label: "Custom", value: "false" },
+              { label: "Yes", value: "true" },
+              { label: "No", value: "false" },
             ],
           },
         ]}

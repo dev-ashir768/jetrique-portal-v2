@@ -3,7 +3,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { getErrorMessage, rbacApi } from "@/lib/api"
 import { useRBACStore } from "@/stores"
-import type { MenusParams, CreateMenuPayload, UpdateMenuPayload, PermissionsParams, CreatePermissionPayload, UpdatePermissionPayload, RolesParams, CreateRolePayload, UpdateRolePayload } from "@/types"
+import type { MenusParams, CreateMenuPayload, UpdateMenuPayload, PermissionsParams, CreatePermissionPayload, UpdatePermissionPayload, RolesParams, CreateRolePayload, UpdateRolePayload, AssignRolePermissionsPayload } from "@/types"
 import { toast } from "sonner"
 
 export function useMyMenus() {
@@ -126,6 +126,18 @@ export function useUpdateRole(id: string) {
   return useMutation({
     mutationFn: (payload: UpdateRolePayload) => rbacApi.updateRole(id, payload),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["rbac", "all-roles"] }),
+    onError: (error: Error) => toast.error(getErrorMessage(error)),
+  })
+}
+
+export function useAssignRolePermissions(id: string) {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (payload: AssignRolePermissionsPayload) => rbacApi.assignRolePermissions(id, payload),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["rbac", "all-roles"] })
+      toast.success("Permissions assigned")
+    },
     onError: (error: Error) => toast.error(getErrorMessage(error)),
   })
 }
