@@ -76,7 +76,7 @@ function DocumentCard({
         </p>
       )}
 
-      {(doc.status === "REJECTED" || doc.status === "PENDING") && (
+      {doc.status === "REJECTED" && (
         <>
           <input
             ref={fileInputRef}

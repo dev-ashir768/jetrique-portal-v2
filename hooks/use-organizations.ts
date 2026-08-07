@@ -125,6 +125,7 @@ export function useReuploadOrgDocument(orgId: string) {
       organizationsApi.reuploadDocument(orgId, docId, file),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["organization-documents", orgId] })
+      queryClient.invalidateQueries({ queryKey: ["my-org-documents"] })
       toast.success("Document uploaded successfully")
     },
     onError: (error: Error) => toast.error(getErrorMessage(error)),
