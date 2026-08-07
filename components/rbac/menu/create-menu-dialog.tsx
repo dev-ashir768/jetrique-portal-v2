@@ -52,8 +52,8 @@ export function CreateMenuDialog() {
         slug: values.slug,
         icon: values.icon,
         order: values.order,
-        path: values.path || null,
-        parentId: values.parentId || null,
+        path: values.path || undefined,
+        parentId: values.parentId || undefined,
       }),
       {
         loading: "Please wait...",
