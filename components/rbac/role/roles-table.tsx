@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Eye, Pencil, ShieldPlus } from "lucide-react"
+import { Pencil, ShieldPlus } from "lucide-react"
 import { useAllRoles } from "@/hooks/use-rbac"
 import { DataTable, SortableHeader, features } from "@/components/common/data-table"
 import { Button } from "@/components/ui/button"
@@ -10,8 +10,7 @@ import { PageHeader } from "@/components/common"
 import { usePermissions } from "@/hooks/use-permission"
 import { CreateRoleDialog } from "./create-role-dialog"
 import { EditRoleDialog } from "./edit-role-dialog"
-import { AssignPermissionsDialog } from "./assign-permissions-dialog"
-import { ViewPermissionsDialog } from "./view-permissions-dialog"
+import { ManagePermissionsDialog } from "./manage-permissions-dialog"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import type { ColumnDef } from "@tanstack/table-core"
 import type { Role, RolesParams } from "@/types"
@@ -20,8 +19,7 @@ export function RolesTable() {
   const [params, setParams] = useState<RolesParams>({ page: 1, limit: 10 })
   const [activeFilters, setActiveFilters] = useState<Record<string, string>>({})
   const [editingRole, setEditingRole] = useState<Role | null>(null)
-  const [assigningRole, setAssigningRole] = useState<Role | null>(null)
-  const [viewingRole, setViewingRole] = useState<Role | null>(null)
+  const [managingRole, setManagingRole] = useState<Role | null>(null)
 
   const { data, isLoading, refetch } = useAllRoles(params)
   const perms = usePermissions("roles", ["create", "update"])
@@ -66,23 +64,12 @@ export function RolesTable() {
                   <TooltipTrigger asChild>
                     <Button
                       variant="secondary" size="icon" className="h-8 w-8"
-                      onClick={(e) => { e.stopPropagation(); setViewingRole(row.original) }}
-                    >
-                      <Eye className="h-4 w-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>View Permissions</TooltipContent>
-                </Tooltip>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="secondary" size="icon" className="h-8 w-8"
-                      onClick={(e) => { e.stopPropagation(); setAssigningRole(row.original) }}
+                      onClick={(e) => { e.stopPropagation(); setManagingRole(row.original) }}
                     >
                       <ShieldPlus className="h-4 w-4" />
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent>Assign Permissions</TooltipContent>
+                  <TooltipContent>Manage Permissions</TooltipContent>
                 </Tooltip>
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -130,18 +117,11 @@ export function RolesTable() {
             onOpenChange={(o) => { if (!o) setEditingRole(null) }}
           />
         )}
-        {perms.update && assigningRole && (
-          <AssignPermissionsDialog
-            role={assigningRole}
-            open={!!assigningRole}
-            onOpenChange={(o) => { if (!o) setAssigningRole(null) }}
-          />
-        )}
-        {viewingRole && (
-          <ViewPermissionsDialog
-            role={viewingRole}
-            open={!!viewingRole}
-            onOpenChange={(o) => { if (!o) setViewingRole(null) }}
+        {perms.update && managingRole && (
+          <ManagePermissionsDialog
+            role={managingRole}
+            open={!!managingRole}
+            onOpenChange={(o) => { if (!o) setManagingRole(null) }}
           />
         )}
       </PageHeader>
